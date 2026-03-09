@@ -1,105 +1,152 @@
-/* ================================
-   VENTSISLAVA.COM — Design System
-   Aesthetic: Refined Dark Editorial
-   ================================ */
+/* ====================================================
+   VENTSISLAVA.COM — MISSION: ORBIT
+   Space-themed design: trajectory, stars, orbital paths
+   ==================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
 :root {
-    /* Palette — Midnight with warm amber accents */
-    --bg-deep: #08090d;
-    --bg-primary: #0c0e14;
-    --bg-card: #11131a;
-    --bg-card-hover: #161924;
-    --bg-surface: #1a1d28;
-    --border: #1e2130;
-    --border-hover: #2a2e42;
+    --void: #04050a;
+    --deep-space: #080b15;
+    --nebula: #0e1225;
+    --card-bg: #0f1328;
+    --card-hover: #141838;
+    --border: #1a1f3d;
+    --border-glow: #252d5c;
 
-    --text-primary: #e8eaf0;
-    --text-secondary: #9a9eb5;
-    --text-muted: #5c6080;
+    --star-white: #f0f2ff;
+    --star-dim: #8b92b8;
+    --star-muted: #4a5180;
 
-    --accent: #d4a853;
-    --accent-soft: rgba(212, 168, 83, 0.12);
-    --accent-glow: rgba(212, 168, 83, 0.25);
-    --accent-secondary: #5b8dd9;
-    --accent-secondary-soft: rgba(91, 141, 217, 0.12);
-
-    /* Status colors */
-    --green: #4ade80;
-    --green-soft: rgba(74, 222, 128, 0.1);
-    --purple: #a78bfa;
-    --purple-soft: rgba(167, 139, 250, 0.1);
+    --thrust-orange: #ff7b42;
+    --thrust-glow: rgba(255, 123, 66, 0.15);
+    --exhaust-gold: #fbbf24;
+    --exhaust-glow: rgba(251, 191, 36, 0.12);
+    --orbit-blue: #3b82f6;
+    --orbit-glow: rgba(59, 130, 246, 0.12);
+    --nebula-purple: #8b5cf6;
+    --nebula-glow: rgba(139, 92, 246, 0.1);
+    --signal-green: #34d399;
+    --signal-glow: rgba(52, 211, 153, 0.1);
     --teal: #2dd4bf;
-    --teal-soft: rgba(45, 212, 191, 0.1);
     --rose: #fb7185;
-    --rose-soft: rgba(251, 113, 133, 0.1);
 
-    /* Typography */
-    --font-display: 'Crimson Pro', Georgia, serif;
-    --font-body: 'Outfit', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-body: 'Space Grotesk', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
 
-    /* Spacing */
-    --section-gap: 120px;
-    --container-width: 1080px;
+    --section-gap: 140px;
+    --container: 1100px;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-html { scroll-behavior: smooth; }
+html {
+    scroll-behavior: smooth;
+}
 
 body {
     font-family: var(--font-body);
-    background: var(--bg-deep);
-    color: var(--text-primary);
+    background: var(--void);
+    color: var(--star-white);
     line-height: 1.6;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
 }
 
-/* Subtle grid background */
-body::before {
-    content: '';
+/* ====================================================
+   STAR FIELD — Canvas rendered in JS
+   ==================================================== */
+#starfield {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background-image:
-        linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: 0;
+    pointer-events: none;
 }
 
-/* Vignette */
-body::after {
-    content: '';
+/* Nebula clouds */
+.nebula-cloud {
     position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: radial-gradient(ellipse at 50% 0%, transparent 50%, rgba(8,9,13,0.7) 100%);
+    border-radius: 50%;
+    filter: blur(120px);
     pointer-events: none;
     z-index: 0;
+    mix-blend-mode: screen;
+    animation: drift 30s ease-in-out infinite;
+}
+
+.nebula-1 {
+    width: 800px;
+    height: 800px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+    top: -10%;
+    right: -15%;
+    animation-duration: 25s;
+}
+
+.nebula-2 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 70%);
+    bottom: 20%;
+    left: -10%;
+    animation-delay: -10s;
+    animation-duration: 35s;
+}
+
+.nebula-3 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255, 123, 66, 0.04) 0%, transparent 70%);
+    top: 40%;
+    right: 20%;
+    animation-delay: -18s;
+    animation-duration: 28s;
+}
+
+@keyframes drift {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(40px, -30px) scale(1.05);
+    }
+
+    66% {
+        transform: translate(-20px, 40px) scale(0.95);
+    }
 }
 
 .container {
-    max-width: var(--container-width);
+    max-width: var(--container);
     margin: 0 auto;
     padding: 0 32px;
     position: relative;
     z-index: 1;
 }
 
-/* ================================
+/* ====================================================
    NAVIGATION
-   ================================ */
+   ==================================================== */
 nav {
     position: fixed;
-    top: 0; left: 0; right: 0;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 100;
     padding: 16px 0;
-    background: rgba(8,9,13,0.85);
-    backdrop-filter: blur(20px);
+    background: rgba(4, 5, 10, 0.8);
+    backdrop-filter: blur(24px);
     border-bottom: 1px solid transparent;
     transition: all 0.3s ease;
 }
@@ -115,37 +162,60 @@ nav .container {
 }
 
 .nav-logo {
-    font-family: var(--font-display);
-    font-size: 20px;
-    font-weight: 400;
-    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--star-white);
     text-decoration: none;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.nav-logo span { color: var(--accent); font-style: italic; }
+.nav-logo .rocket {
+    font-size: 18px;
+}
 
 .nav-links {
     display: flex;
-    gap: 32px;
+    gap: 28px;
     list-style: none;
 }
 
 .nav-links a {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 400;
-    color: var(--text-muted);
+    color: var(--star-muted);
     text-decoration: none;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
     transition: color 0.3s ease;
+    position: relative;
 }
 
-.nav-links a:hover { color: var(--accent); }
+.nav-links a:hover {
+    color: var(--thrust-orange);
+}
 
-/* ================================
-   HERO SECTION
-   ================================ */
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--thrust-orange);
+    transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+    width: 100%;
+}
+
+/* ====================================================
+   HERO — "Mission Control"
+   ==================================================== */
 .hero {
     min-height: 100vh;
     display: flex;
@@ -155,58 +225,69 @@ nav .container {
 }
 
 .hero-content {
-    max-width: 720px;
+    max-width: 700px;
 }
 
-.hero-badge {
+.mission-tag {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 6px 14px;
-    background: var(--accent-soft);
-    border: 1px solid rgba(212,168,83,0.2);
-    border-radius: 2px;
+    padding: 6px 16px;
+    background: var(--thrust-glow);
+    border: 1px solid rgba(255, 123, 66, 0.25);
+    border-radius: 100px;
     font-family: var(--font-mono);
     font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 1.5px;
+    color: var(--thrust-orange);
+    letter-spacing: 2px;
     text-transform: uppercase;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
 }
 
-.hero-badge .dot {
-    width: 6px; height: 6px;
-    background: var(--accent);
+.mission-tag .blink {
+    width: 6px;
+    height: 6px;
+    background: var(--thrust-orange);
     border-radius: 50%;
-    animation: pulse 2.5s infinite;
+    animation: blink 1.5s infinite;
+    box-shadow: 0 0 8px var(--thrust-orange);
 }
 
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.2;
+    }
 }
 
 .hero h1 {
     font-family: var(--font-display);
-    font-size: 72px;
-    font-weight: 300;
-    line-height: 1.05;
-    color: var(--text-primary);
+    font-size: 68px;
+    font-weight: 400;
+    line-height: 1.1;
+    color: var(--star-white);
     margin-bottom: 24px;
-    letter-spacing: -1px;
+    letter-spacing: -0.5px;
 }
 
 .hero h1 em {
     font-style: italic;
-    color: var(--accent);
-    font-weight: 400;
+    background: linear-gradient(135deg, var(--thrust-orange), var(--exhaust-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-.hero-subtitle {
+.hero-sub {
     font-size: 18px;
     font-weight: 300;
-    color: var(--text-secondary);
-    line-height: 1.7;
+    color: var(--star-dim);
+    line-height: 1.75;
     max-width: 540px;
     margin-bottom: 40px;
 }
@@ -217,84 +298,60 @@ nav .container {
     align-items: center;
 }
 
-.btn-primary {
+.btn-launch {
     display: inline-flex;
     align-items: center;
     gap: 10px;
     padding: 14px 28px;
-    background: var(--accent);
-    color: var(--bg-deep);
+    background: linear-gradient(135deg, var(--thrust-orange), #ff9a5c);
+    color: var(--void);
     font-family: var(--font-body);
     font-size: 14px;
     font-weight: 600;
     text-decoration: none;
-    border-radius: 2px;
+    border-radius: 100px;
     letter-spacing: 0.5px;
     transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(255, 123, 66, 0.3);
 }
 
-.btn-primary:hover {
-    background: #e0b760;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(212,168,83,0.25);
+.btn-launch:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(255, 123, 66, 0.4);
 }
 
-.btn-secondary {
+.btn-orbit {
     display: inline-flex;
     align-items: center;
     gap: 10px;
     padding: 14px 28px;
     background: transparent;
-    color: var(--text-secondary);
+    color: var(--star-dim);
     font-family: var(--font-body);
     font-size: 14px;
     font-weight: 400;
     text-decoration: none;
     border: 1px solid var(--border);
-    border-radius: 2px;
-    letter-spacing: 0.5px;
+    border-radius: 100px;
     transition: all 0.3s ease;
 }
 
-.btn-secondary:hover {
-    border-color: var(--border-hover);
-    color: var(--text-primary);
+.btn-orbit:hover {
+    border-color: var(--border-glow);
+    color: var(--star-white);
 }
 
-/* Ambient glow on hero */
-.hero-glow {
-    position: absolute;
-    top: 10%;
-    right: -10%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(212,168,83,0.06) 0%, transparent 70%);
-    filter: blur(80px);
-    pointer-events: none;
-}
-
-.hero-glow-2 {
-    position: absolute;
-    bottom: 0;
-    left: -15%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(91,141,217,0.05) 0%, transparent 70%);
-    filter: blur(80px);
-    pointer-events: none;
-}
-
-/* ================================
-   SECTION HEADERS
-   ================================ */
-.section {
+/* ====================================================
+   TRAJECTORY — Journey as a flight path
+   ==================================================== */
+.trajectory {
     padding: var(--section-gap) 0;
 }
 
 .section-label {
     font-family: var(--font-mono);
     font-size: 11px;
-    color: var(--accent);
+    color: var(--thrust-orange);
     letter-spacing: 2px;
     text-transform: uppercase;
     margin-bottom: 12px;
@@ -302,291 +359,483 @@ nav .container {
 
 .section-title {
     font-family: var(--font-display);
-    font-size: 42px;
-    font-weight: 300;
-    line-height: 1.15;
-    color: var(--text-primary);
+    font-size: 44px;
+    font-weight: 400;
+    line-height: 1.2;
+    color: var(--star-white);
     margin-bottom: 16px;
 }
 
 .section-title em {
     font-style: italic;
-    color: var(--accent);
+    background: linear-gradient(135deg, var(--thrust-orange), var(--exhaust-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-.section-description {
+.section-desc {
     font-size: 16px;
-    color: var(--text-secondary);
+    color: var(--star-dim);
     max-width: 560px;
+    line-height: 1.7;
+    font-weight: 300;
+    margin-bottom: 56px;
+}
+
+/* Flight path timeline */
+.flight-path {
+    position: relative;
+    padding-left: 60px;
+}
+
+/* Vertical trajectory line */
+.flight-path::before {
+    content: '';
+    position: absolute;
+    left: 23px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg,
+            var(--thrust-orange) 0%,
+            var(--orbit-blue) 50%,
+            var(--signal-green) 100%);
+    opacity: 0.4;
+}
+
+.waypoint {
+    position: relative;
+    margin-bottom: 48px;
+    padding: 28px 32px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    transition: all 0.4s ease;
+}
+
+.waypoint:hover {
+    border-color: var(--border-glow);
+    background: var(--card-hover);
+    transform: translateX(8px);
+}
+
+/* Waypoint dot on trajectory line */
+.waypoint::before {
+    content: '';
+    position: absolute;
+    left: -48px;
+    top: 32px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid;
+    z-index: 2;
+}
+
+/* Connection line from dot to card */
+.waypoint::after {
+    content: '';
+    position: absolute;
+    left: -34px;
+    top: 38px;
+    width: 34px;
+    height: 2px;
+    opacity: 0.3;
+}
+
+.waypoint-launch::before {
+    border-color: var(--thrust-orange);
+    background: var(--void);
+    box-shadow: 0 0 12px rgba(255, 123, 66, 0.5);
+}
+
+.waypoint-launch::after {
+    background: var(--thrust-orange);
+}
+
+.waypoint-launch:hover {
+    border-color: rgba(255, 123, 66, 0.3);
+}
+
+.waypoint-orbit::before {
+    border-color: var(--orbit-blue);
+    background: var(--void);
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+}
+
+.waypoint-orbit::after {
+    background: var(--orbit-blue);
+}
+
+.waypoint-orbit:hover {
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.waypoint-station::before {
+    border-color: var(--signal-green);
+    background: var(--void);
+    box-shadow: 0 0 12px rgba(52, 211, 153, 0.5);
+}
+
+.waypoint-station::after {
+    background: var(--signal-green);
+}
+
+.waypoint-station:hover {
+    border-color: rgba(52, 211, 153, 0.3);
+}
+
+.waypoint-era {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.waypoint-launch .waypoint-era {
+    color: var(--thrust-orange);
+}
+
+.waypoint-orbit .waypoint-era {
+    color: var(--orbit-blue);
+}
+
+.waypoint-station .waypoint-era {
+    color: var(--signal-green);
+}
+
+.waypoint-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 400;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.waypoint-subtitle {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--star-muted);
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.waypoint-text {
+    font-size: 14px;
+    color: var(--star-dim);
     line-height: 1.7;
     font-weight: 300;
 }
 
-/* ================================
-   JOURNEY SECTION
-   ================================ */
-.journey-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-    margin-top: 48px;
+.waypoint-text strong {
+    color: var(--star-white);
+    font-weight: 500;
 }
 
-.journey-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 32px 28px;
-    position: relative;
-    transition: all 0.3s ease;
+/* ====================================================
+   MISSION DECK — Portfolio projects
+   ==================================================== */
+.mission-deck {
+    padding: var(--section-gap) 0;
 }
 
-.journey-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 3px; height: 0;
-    background: var(--accent);
-    transition: height 0.4s ease;
-}
-
-.journey-card:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
-.journey-card:hover::before { height: 100%; }
-
-.journey-era {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 1px;
-    margin-bottom: 14px;
-}
-
-.journey-title {
-    font-family: var(--font-display);
-    font-size: 22px;
-    font-weight: 400;
-    color: var(--text-primary);
-    margin-bottom: 12px;
-    line-height: 1.3;
-}
-
-.journey-text {
-    font-size: 14px;
-    color: var(--text-secondary);
-    line-height: 1.65;
-    font-weight: 300;
-}
-
-/* ================================
-   GRC PORTFOLIO
-   ================================ */
-.portfolio-grid {
+.mission-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 24px;
     margin-top: 48px;
 }
 
-.project-card {
-    background: var(--bg-card);
+.mission-card {
+    background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 2px;
+    border-radius: 8px;
     padding: 36px 32px;
     position: relative;
     overflow: hidden;
-    transition: all 0.4s ease;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.project-card::after {
+.mission-card::before {
     content: '';
     position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, var(--accent), transparent);
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
-.project-card:hover {
-    border-color: var(--border-hover);
-    background: var(--bg-card-hover);
-    transform: translateY(-4px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+.mission-card:hover {
+    border-color: var(--border-glow);
+    background: var(--card-hover);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
 }
 
-.project-card:hover::after { opacity: 1; }
+.mission-card:hover::before {
+    opacity: 1;
+}
 
-.project-status {
+.mission-card:nth-child(1)::before {
+    background: linear-gradient(90deg, var(--teal), transparent);
+}
+
+.mission-card:nth-child(2)::before {
+    background: linear-gradient(90deg, var(--nebula-purple), transparent);
+}
+
+.mission-card:nth-child(3)::before {
+    background: linear-gradient(90deg, var(--orbit-blue), transparent);
+}
+
+.mission-card:nth-child(4)::before {
+    background: linear-gradient(90deg, var(--thrust-orange), transparent);
+}
+
+.mission-status {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 10px;
-    border-radius: 2px;
+    padding: 4px 12px;
+    border-radius: 100px;
     font-family: var(--font-mono);
     font-size: 10px;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
 }
 
-.status-live {
-    background: var(--green-soft);
-    color: var(--green);
-    border: 1px solid rgba(74,222,128,0.2);
+.status-operational {
+    background: var(--signal-glow);
+    color: var(--signal-green);
+    border: 1px solid rgba(52, 211, 153, 0.25);
 }
 
-.status-dev {
-    background: var(--purple-soft);
-    color: var(--purple);
-    border: 1px solid rgba(167,139,250,0.2);
+.status-in-flight {
+    background: var(--nebula-glow);
+    color: var(--nebula-purple);
+    border: 1px solid rgba(139, 92, 246, 0.25);
 }
 
-.status-planned {
-    background: var(--accent-soft);
-    color: var(--accent);
-    border: 1px solid rgba(212,168,83,0.2);
+.status-pre-launch {
+    background: var(--exhaust-glow);
+    color: var(--exhaust-gold);
+    border: 1px solid rgba(251, 191, 36, 0.25);
 }
 
-.project-icon {
+.mission-icon {
     font-size: 28px;
     margin-bottom: 16px;
 }
 
-.project-name {
+.mission-name {
     font-family: var(--font-display);
-    font-size: 24px;
+    font-size: 22px;
     font-weight: 400;
-    color: var(--text-primary);
+    color: var(--star-white);
     margin-bottom: 12px;
     line-height: 1.3;
 }
 
-.project-description {
+.mission-brief {
     font-size: 14px;
-    color: var(--text-secondary);
+    color: var(--star-dim);
     line-height: 1.7;
     font-weight: 300;
     margin-bottom: 20px;
 }
 
-.project-tags {
+.mission-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
 }
 
-.tag {
+.mtag {
     font-family: var(--font-mono);
     font-size: 10px;
-    padding: 4px 10px;
-    background: rgba(0,0,0,0.3);
+    padding: 3px 10px;
+    background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--border);
-    border-radius: 2px;
-    color: var(--text-muted);
+    border-radius: 100px;
+    color: var(--star-muted);
     letter-spacing: 0.5px;
 }
 
-.project-frameworks {
+.mission-frameworks {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
 }
 
-.framework-badge {
+.fw {
     font-family: var(--font-mono);
     font-size: 10px;
-    padding: 4px 10px;
-    border-radius: 2px;
+    padding: 3px 10px;
+    border-radius: 100px;
     letter-spacing: 0.5px;
 }
 
-.fw-soc2 { background: var(--teal-soft); color: var(--teal); border: 1px solid rgba(45,212,191,0.2); }
-.fw-nist { background: var(--purple-soft); color: var(--purple); border: 1px solid rgba(167,139,250,0.2); }
-.fw-iso { background: var(--accent-secondary-soft); color: var(--accent-secondary); border: 1px solid rgba(91,141,217,0.2); }
-.fw-pci { background: var(--rose-soft); color: var(--rose); border: 1px solid rgba(251,113,133,0.2); }
+.fw-soc2 {
+    background: rgba(45, 212, 191, 0.1);
+    color: var(--teal);
+    border: 1px solid rgba(45, 212, 191, 0.2);
+}
 
-/* ================================
-   COMPETENCIES
-   ================================ */
-.competency-grid {
+.fw-nist {
+    background: var(--nebula-glow);
+    color: var(--nebula-purple);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.fw-iso {
+    background: var(--orbit-glow);
+    color: var(--orbit-blue);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.fw-pci {
+    background: rgba(251, 113, 133, 0.08);
+    color: var(--rose);
+    border: 1px solid rgba(251, 113, 133, 0.2);
+}
+
+/* ====================================================
+   SYSTEMS — Expertise grid
+   ==================================================== */
+.systems {
+    padding: var(--section-gap) 0;
+}
+
+.systems-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
     margin-top: 48px;
 }
 
-.competency-item {
+.system-item {
     display: flex;
     align-items: flex-start;
     gap: 14px;
-    padding: 20px;
-    background: var(--bg-card);
+    padding: 20px 22px;
+    background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 2px;
-    transition: border-color 0.3s ease;
+    border-radius: 6px;
+    transition: all 0.3s ease;
 }
 
-.competency-item:hover { border-color: var(--border-hover); }
+.system-item:hover {
+    border-color: var(--border-glow);
+}
 
-.competency-icon {
+.system-icon {
     font-size: 20px;
     flex-shrink: 0;
     margin-top: 2px;
 }
 
-.competency-label {
+.system-name {
     font-size: 14px;
     font-weight: 500;
-    color: var(--text-primary);
+    color: var(--star-white);
     margin-bottom: 4px;
 }
 
-.competency-detail {
+.system-detail {
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--star-muted);
     line-height: 1.5;
     font-weight: 300;
 }
 
-/* ================================
-   CONTACT
-   ================================ */
-.contact-section {
+/* ====================================================
+   CREDENTIALS
+   ==================================================== */
+.credentials {
+    padding: var(--section-gap) 0;
+    padding-top: 0;
+}
+
+.cred-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 32px;
+}
+
+.cred-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 18px 22px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+}
+
+.cred-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.cred-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--star-white);
+    margin-bottom: 2px;
+}
+
+.cred-org {
+    font-size: 12px;
+    color: var(--star-muted);
+    font-weight: 300;
+}
+
+/* ====================================================
+   CONTACT — Transmission
+   ==================================================== */
+.transmission {
     text-align: center;
     padding: var(--section-gap) 0;
 }
 
-.contact-links {
+.transmission-links {
     display: flex;
     justify-content: center;
-    gap: 24px;
+    gap: 20px;
     margin-top: 40px;
 }
 
-.contact-link {
+.tx-link {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 14px 24px;
-    background: var(--bg-card);
+    background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 2px;
-    color: var(--text-secondary);
+    border-radius: 100px;
+    color: var(--star-dim);
     text-decoration: none;
     font-size: 14px;
     transition: all 0.3s ease;
 }
 
-.contact-link:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    transform: translateY(-2px);
+.tx-link:hover {
+    border-color: var(--thrust-orange);
+    color: var(--thrust-orange);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(255, 123, 66, 0.15);
 }
 
-/* ================================
+/* ====================================================
    FOOTER
-   ================================ */
+   ==================================================== */
 footer {
     border-top: 1px solid var(--border);
     padding: 32px 0;
@@ -595,40 +844,103 @@ footer {
 
 .footer-text {
     font-size: 12px;
-    color: var(--text-muted);
+    color: var(--star-muted);
     font-weight: 300;
 }
 
-/* ================================
+/* ====================================================
    ANIMATIONS
-   ================================ */
-.fade-in {
+   ==================================================== */
+.fade-up {
     opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(24px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.fade-in.visible {
+.fade-up.visible {
     opacity: 1;
     transform: translateY(0);
 }
 
-.stagger-1 { transition-delay: 0.1s; }
-.stagger-2 { transition-delay: 0.2s; }
-.stagger-3 { transition-delay: 0.3s; }
-.stagger-4 { transition-delay: 0.4s; }
+.stagger-1 {
+    transition-delay: 0.05s;
+}
 
-/* ================================
+.stagger-2 {
+    transition-delay: 0.1s;
+}
+
+.stagger-3 {
+    transition-delay: 0.15s;
+}
+
+.stagger-4 {
+    transition-delay: 0.2s;
+}
+
+/* ====================================================
    RESPONSIVE
-   ================================ */
+   ==================================================== */
 @media (max-width: 768px) {
-    .hero h1 { font-size: 42px; }
-    .journey-grid { grid-template-columns: 1fr; }
-    .portfolio-grid { grid-template-columns: 1fr; }
-    .competency-grid { grid-template-columns: 1fr; }
-    .nav-links { display: none; }
-    .section { padding: 80px 0; }
-    .section-title { font-size: 32px; }
-    .hero { padding-top: 100px; }
-    .contact-links { flex-direction: column; align-items: center; }
+    .hero h1 {
+        font-size: 40px;
+    }
+
+    .section-title {
+        font-size: 32px;
+    }
+
+    .mission-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .systems-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cred-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    .trajectory {
+        padding: 80px 0;
+    }
+
+    .mission-deck,
+    .systems,
+    .transmission {
+        padding: 80px 0;
+    }
+
+    .hero {
+        padding-top: 100px;
+    }
+
+    .flight-path {
+        padding-left: 48px;
+    }
+
+    .flight-path::before {
+        left: 17px;
+    }
+
+    .waypoint::before {
+        left: -42px;
+        width: 12px;
+        height: 12px;
+    }
+
+    .waypoint::after {
+        left: -30px;
+        width: 30px;
+    }
+
+    .transmission-links {
+        flex-direction: column;
+        align-items: center;
+    }
 }

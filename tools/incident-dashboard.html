@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incident Response Dashboard — V. Zaharieva</title>
+    <meta name="description"
+        content="Interactive incident response metrics dashboard demonstrating MTTD, MTTR, severity analysis, and SLA compliance tracking.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --void: #04050a;
+            --deep-space: #080b15;
+            --nebula: #0e1225;
+            --card-bg: #0f1328;
+            --card-hover: #141838;
+            --border: #1a1f3d;
+            --border-glow: #252d5c;
+            --star-white: #f0f2ff;
+            --star-dim: #8b92b8;
+            --star-muted: #4a5180;
+            --thrust-orange: #ff7b42;
+            --signal-green: #34d399;
+            --orbit-blue: #3b82f6;
+            --nebula-purple: #8b5cf6;
+            --rose: #fb7185;
+            --exhaust-gold: #fbbf24;
+            --teal: #2dd4bf;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--void);
+            color: var(--star-white);
+            overflow-x: hidden;
+        }
+
+        /* Nav */
+        .top-bar {
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: rgba(4, 5, 10, 0.9);
+            backdrop-filter: blur(24px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-link {
+            color: var(--star-muted);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--thrust-orange);
+        }
+
+        .dash-title {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .status-live {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--signal-green);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .status-live .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--signal-green);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 8px var(--signal-green);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Layout */
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px;
+        }
+
+        .dash-header {
+            margin-bottom: 40px;
+        }
+
+        .dash-header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .dash-header p {
+            color: var(--star-dim);
+            font-size: 14px;
+            font-weight: 300;
+            line-height: 1.6;
+            max-width: 600px;
+        }
+
+        /* Period selector */
+        .period-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 32px;
+        }
+
+        .period-btn {
+            padding: 8px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--star-muted);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .period-btn:hover {
+            border-color: var(--border-glow);
+            color: var(--star-white);
+        }
+
+        .period-btn.active {
+            background: rgba(255, 123, 66, 0.1);
+            border-color: var(--thrust-orange);
+            color: var(--thrust-orange);
+        }
+
+        /* KPI Row */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .kpi-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .kpi-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--star-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .kpi-value {
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        .kpi-unit {
+            font-size: 14px;
+            font-weight: 300;
+            color: var(--star-dim);
+        }
+
+        .kpi-trend {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            margin-top: 8px;
+        }
+
+        .trend-good {
+            color: var(--signal-green);
+        }
+
+        .trend-warn {
+            color: var(--exhaust-gold);
+        }
+
+        .trend-bad {
+            color: var(--rose);
+        }
+
+        /* Charts */
+        .chart-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .chart-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .chart-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .chart-subtitle {
+            font-size: 12px;
+            color: var(--star-muted);
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .chart-body {
+            position: relative;
+        }
+
+        /* Severity bars */
+        .severity-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sev-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sev-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--star-muted);
+            width: 80px;
+            letter-spacing: 0.5px;
+        }
+
+        .sev-track {
+            flex: 1;
+            height: 28px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sev-fill {
+            height: 100%;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--void);
+            font-weight: 600;
+            transition: width 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .sev-count {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--star-muted);
+            width: 40px;
+            text-align: right;
+        }
+
+        /* Timeline chart */
+        .timeline-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 160px;
+            padding-top: 20px;
+        }
+
+        .timeline-bar-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .timeline-bar {
+            width: 100%;
+            border-radius: 3px 3px 0 0;
+            min-height: 2px;
+            transition: height 1s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .timeline-bar:hover {
+            opacity: 0.8;
+        }
+
+        .timeline-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            color: var(--star-muted);
+            margin-top: 8px;
+        }
+
+        /* Root cause */
+        .rc-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .rc-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .rc-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .rc-info {
+            flex: 1;
+        }
+
+        .rc-name {
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .rc-pct {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--star-muted);
+        }
+
+        /* SLA Table */
+        .sla-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .sla-table th {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--star-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sla-table td {
+            font-size: 13px;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .sla-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 100px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .sla-met {
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--signal-green);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        .sla-risk {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--exhaust-gold);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .sla-breach {
+            background: rgba(251, 113, 133, 0.08);
+            color: var(--rose);
+            border: 1px solid rgba(251, 113, 133, 0.2);
+        }
+
+        /* Incident Log */
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .incident-log {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .log-entry {
+            display: grid;
+            grid-template-columns: 100px 60px 1fr 100px 120px;
+            gap: 16px;
+            align-items: center;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 13px;
+        }
+
+        .log-id {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--thrust-orange);
+        }
+
+        .log-sev {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 100px;
+            text-align: center;
+        }
+
+        .log-sev.p1 {
+            background: rgba(251, 113, 133, 0.1);
+            color: var(--rose);
+        }
+
+        .log-sev.p2 {
+            background: rgba(255, 123, 66, 0.1);
+            color: var(--thrust-orange);
+        }
+
+        .log-sev.p3 {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--exhaust-gold);
+        }
+
+        .log-sev.p4 {
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--signal-green);
+        }
+
+        .log-desc {
+            color: var(--star-dim);
+        }
+
+        .log-duration {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 12px;
+            color: var(--star-muted);
+        }
+
+        .log-status {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+        }
+
+        .log-resolved {
+            color: var(--signal-green);
+        }
+
+        .log-investigating {
+            color: var(--exhaust-gold);
+        }
+
+        /* Footer */
+        .dash-footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            margin-top: 32px;
+        }
+
+        .dash-footer p {
+            font-size: 12px;
+            color: var(--star-muted);
+        }
+
+        .dash-footer a {
+            color: var(--thrust-orange);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .kpi-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .log-entry {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .dashboard {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top-bar">
+        <a href="../" class="back-link">← ventsislava.com</a>
+        <span class="dash-title">Incident Response Dashboard</span>
+        <div class="status-live"><span class="dot"></span> DEMO DATA</div>
+    </div>
+
+    <div class="dashboard">
+        <div class="dash-header">
+            <h1>Incident Response Metrics</h1>
+            <p>Operational intelligence dashboard tracking incident response performance, severity trends, SLA
+                compliance, and root cause patterns. Built from real-world incident management experience across global
+                enterprise environments.</p>
+        </div>
+
+        <div class="period-selector">
+            <button class="period-btn active" onclick="setPeriod(this)">30 DAYS</button>
+            <button class="period-btn" onclick="setPeriod(this)">90 DAYS</button>
+            <button class="period-btn" onclick="setPeriod(this)">6 MONTHS</button>
+            <button class="period-btn" onclick="setPeriod(this)">YTD</button>
+        </div>
+
+        <!-- KPI Row -->
+        <div class="kpi-row">
+            <div class="kpi-card">
+                <div class="kpi-label">Mean Time to Detect</div>
+                <div class="kpi-value" style="color: var(--teal);">4.2</div>
+                <div class="kpi-unit">minutes</div>
+                <div class="kpi-trend trend-good">↓ 18% from prev period</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Mean Time to Resolve</div>
+                <div class="kpi-value" style="color: var(--orbit-blue);">47</div>
+                <div class="kpi-unit">minutes</div>
+                <div class="kpi-trend trend-good">↓ 12% from prev period</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Total Incidents</div>
+                <div class="kpi-value" style="color: var(--star-white);">156</div>
+                <div class="kpi-unit">this period</div>
+                <div class="kpi-trend trend-warn">↑ 8% from prev period</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">SLA Compliance</div>
+                <div class="kpi-value" style="color: var(--signal-green);">96.8</div>
+                <div class="kpi-unit">percent</div>
+                <div class="kpi-trend trend-good">↑ 2.1% from prev period</div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <div class="chart-title">Severity Distribution</div>
+                <div class="chart-subtitle">Incident count by priority level</div>
+                <div class="severity-bars">
+                    <div class="sev-row">
+                        <span class="sev-label">P1 Critical</span>
+                        <div class="sev-track">
+                            <div class="sev-fill" style="width: 8%; background: var(--rose);">3</div>
+                        </div>
+                        <span class="sev-count">3</span>
+                    </div>
+                    <div class="sev-row">
+                        <span class="sev-label">P2 High</span>
+                        <div class="sev-track">
+                            <div class="sev-fill" style="width: 22%; background: var(--thrust-orange);">18</div>
+                        </div>
+                        <span class="sev-count">18</span>
+                    </div>
+                    <div class="sev-row">
+                        <span class="sev-label">P3 Medium</span>
+                        <div class="sev-track">
+                            <div class="sev-fill" style="width: 55%; background: var(--exhaust-gold);">67</div>
+                        </div>
+                        <span class="sev-count">67</span>
+                    </div>
+                    <div class="sev-row">
+                        <span class="sev-label">P4 Low</span>
+                        <div class="sev-track">
+                            <div class="sev-fill" style="width: 100%; background: var(--teal);">68</div>
+                        </div>
+                        <span class="sev-count">68</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">Root Cause Analysis</div>
+                <div class="chart-subtitle">Top categories driving incidents</div>
+                <div class="rc-grid">
+                    <div class="rc-item">
+                        <div class="rc-dot" style="background: var(--orbit-blue);"></div>
+                        <div class="rc-info">
+                            <div class="rc-name">Infrastructure</div>
+                            <div class="rc-pct">34% · 53 incidents</div>
+                        </div>
+                    </div>
+                    <div class="rc-item">
+                        <div class="rc-dot" style="background: var(--nebula-purple);"></div>
+                        <div class="rc-info">
+                            <div class="rc-name">Code Deployment</div>
+                            <div class="rc-pct">24% · 37 incidents</div>
+                        </div>
+                    </div>
+                    <div class="rc-item">
+                        <div class="rc-dot" style="background: var(--thrust-orange);"></div>
+                        <div class="rc-info">
+                            <div class="rc-name">Configuration</div>
+                            <div class="rc-pct">19% · 30 incidents</div>
+                        </div>
+                    </div>
+                    <div class="rc-item">
+                        <div class="rc-dot" style="background: var(--exhaust-gold);"></div>
+                        <div class="rc-info">
+                            <div class="rc-name">Third-Party</div>
+                            <div class="rc-pct">13% · 20 incidents</div>
+                        </div>
+                    </div>
+                    <div class="rc-item">
+                        <div class="rc-dot" style="background: var(--teal);"></div>
+                        <div class="rc-info">
+                            <div class="rc-name">Capacity</div>
+                            <div class="rc-pct">6% · 9 incidents</div>
+                        </div>
+                    </div>
+                    <div class="rc-item">
+                        <div class="rc-dot" style="background: var(--rose);"></div>
+                        <div class="rc-info">
+                            <div class="rc-name">Security</div>
+                            <div class="rc-pct">4% · 7 incidents</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="chart-grid">
+            <div class="chart-card">
+                <div class="chart-title">Incident Volume Trend</div>
+                <div class="chart-subtitle">Weekly incident count over 12 weeks</div>
+                <div class="timeline-chart" id="volumeChart"></div>
+            </div>
+
+            <div class="chart-card">
+                <div class="chart-title">SLA Performance by Severity</div>
+                <div class="chart-subtitle">Response and resolution targets</div>
+                <table class="sla-table">
+                    <thead>
+                        <tr>
+                            <th>Severity</th>
+                            <th>Target</th>
+                            <th>Actual</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>P1 Critical</td>
+                            <td>15 min response</td>
+                            <td>8 min</td>
+                            <td><span class="sla-badge sla-met">MET</span></td>
+                        </tr>
+                        <tr>
+                            <td>P1 Critical</td>
+                            <td>1 hr resolve</td>
+                            <td>42 min</td>
+                            <td><span class="sla-badge sla-met">MET</span></td>
+                        </tr>
+                        <tr>
+                            <td>P2 High</td>
+                            <td>30 min response</td>
+                            <td>22 min</td>
+                            <td><span class="sla-badge sla-met">MET</span></td>
+                        </tr>
+                        <tr>
+                            <td>P2 High</td>
+                            <td>4 hr resolve</td>
+                            <td>3.2 hr</td>
+                            <td><span class="sla-badge sla-met">MET</span></td>
+                        </tr>
+                        <tr>
+                            <td>P3 Medium</td>
+                            <td>2 hr response</td>
+                            <td>1.8 hr</td>
+                            <td><span class="sla-badge sla-risk">AT RISK</span></td>
+                        </tr>
+                        <tr>
+                            <td>P4 Low</td>
+                            <td>24 hr response</td>
+                            <td>6.4 hr</td>
+                            <td><span class="sla-badge sla-met">MET</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Incidents -->
+        <div class="chart-grid">
+            <div class="chart-card full-width">
+                <div class="chart-title">Recent Incidents</div>
+                <div class="chart-subtitle">Last 8 incidents with resolution details</div>
+                <div class="incident-log">
+                    <div class="log-entry">
+                        <span class="log-id">INC-2026-312</span>
+                        <span class="log-sev p1">P1</span>
+                        <span class="log-desc">Payment processing latency — gateway timeout affecting 12% of
+                            transactions</span>
+                        <span class="log-duration">38 min</span>
+                        <span class="log-status log-resolved">✓ Resolved</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-id">INC-2026-311</span>
+                        <span class="log-sev p2">P2</span>
+                        <span class="log-desc">Authentication service degraded — SSO login failures for merchant
+                            portal</span>
+                        <span class="log-duration">1.2 hr</span>
+                        <span class="log-status log-resolved">✓ Resolved</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-id">INC-2026-310</span>
+                        <span class="log-sev p3">P3</span>
+                        <span class="log-desc">Monitoring gap — Datadog agent disconnected on 3 production nodes</span>
+                        <span class="log-duration">45 min</span>
+                        <span class="log-status log-resolved">✓ Resolved</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-id">INC-2026-309</span>
+                        <span class="log-sev p2">P2</span>
+                        <span class="log-desc">Database replication lag — read replica 480s behind primary</span>
+                        <span class="log-duration">2.4 hr</span>
+                        <span class="log-status log-resolved">✓ Resolved</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-id">INC-2026-308</span>
+                        <span class="log-sev p3">P3</span>
+                        <span class="log-desc">Certificate expiry warning — TLS cert on API gateway expiring in 72
+                            hours</span>
+                        <span class="log-duration">22 min</span>
+                        <span class="log-status log-resolved">✓ Resolved</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-id">INC-2026-307</span>
+                        <span class="log-sev p4">P4</span>
+                        <span class="log-desc">Non-critical — Staging environment deployment pipeline stuck</span>
+                        <span class="log-duration">3.1 hr</span>
+                        <span class="log-status log-resolved">✓ Resolved</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dash-footer">
+            <p>Incident Response Dashboard · Demo with simulated metrics · Built by <a href="../">V. Zaharieva</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Period selector
+        function setPeriod(btn) {
+            document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        // Volume chart
+        const weeklyData = [8, 12, 10, 15, 11, 14, 18, 13, 9, 16, 14, 16];
+        const volumeChart = document.getElementById('volumeChart');
+        const maxVal = Math.max(...weeklyData);
+
+        weeklyData.forEach((val, i) => {
+            const group = document.createElement('div');
+            group.className = 'timeline-bar-group';
+            const bar = document.createElement('div');
+            bar.className = 'timeline-bar';
+            bar.style.height = '0px';
+            bar.style.background = val > 14 ? 'var(--thrust-orange)' : 'var(--orbit-blue)';
+            bar.title = `Week ${i + 1}: ${val} incidents`;
+            const label = document.createElement('div');
+            label.className = 'timeline-label';
+            label.textContent = `W${i + 1}`;
+            group.appendChild(bar);
+            group.appendChild(label);
+            volumeChart.appendChild(group);
+            setTimeout(() => { bar.style.height = (val / maxVal * 140) + 'px'; }, 100 + i * 60);
+        });
+    </script>
+</body>
+
+</html>

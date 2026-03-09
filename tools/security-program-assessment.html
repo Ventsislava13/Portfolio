@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Program Maturity Assessment — V. Zaharieva</title>
+    <meta name="description"
+        content="Comprehensive security program maturity assessment aligned to NIST CSF, ISO 27001, CISM, and CISA. Evaluate governance, risk, operations, and compliance across 10 domains.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --void: #04050a;
+            --deep-space: #080b15;
+            --nebula: #0e1225;
+            --card-bg: #0f1328;
+            --card-hover: #141838;
+            --border: #1a1f3d;
+            --border-glow: #252d5c;
+            --star-white: #f0f2ff;
+            --star-dim: #8b92b8;
+            --star-muted: #4a5180;
+            --thrust-orange: #ff7b42;
+            --signal-green: #34d399;
+            --orbit-blue: #3b82f6;
+            --nebula-purple: #8b5cf6;
+            --rose: #fb7185;
+            --exhaust-gold: #fbbf24;
+            --teal: #2dd4bf;
+            --cyan: #22d3ee;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--void);
+            color: var(--star-white);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Top bar */
+        .top-bar {
+            padding: 14px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: rgba(4, 5, 10, 0.92);
+            backdrop-filter: blur(24px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .back-link {
+            color: var(--star-muted);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--thrust-orange);
+        }
+
+        .tool-title {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+
+        .framework-tags {
+            display: flex;
+            gap: 6px;
+        }
+
+        .fw-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            padding: 3px 8px;
+            border-radius: 100px;
+            letter-spacing: 0.8px;
+        }
+
+        .fw-nist {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--nebula-purple);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .fw-iso {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--orbit-blue);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .fw-cism {
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--signal-green);
+            border: 1px solid rgba(52, 211, 153, 0.2);
+        }
+
+        .fw-cisa {
+            background: rgba(255, 123, 66, 0.1);
+            color: var(--thrust-orange);
+            border: 1px solid rgba(255, 123, 66, 0.2);
+        }
+
+        /* Layout */
+        .app {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 48px 32px;
+        }
+
+        .app-header {
+            margin-bottom: 48px;
+        }
+
+        .app-header h1 {
+            font-size: 34px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 12px;
+        }
+
+        .app-header p {
+            color: var(--star-dim);
+            font-size: 15px;
+            font-weight: 300;
+            line-height: 1.7;
+            max-width: 700px;
+        }
+
+        .methodology {
+            margin-top: 20px;
+            padding: 16px 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+        }
+
+        .methodology-title {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--thrust-orange);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .methodology p {
+            font-size: 13px;
+            color: var(--star-dim);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+
+        .levels-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .level-chip {
+            text-align: center;
+            padding: 8px 4px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        .level-chip .num {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--star-white);
+        }
+
+        .level-chip .lbl {
+            font-size: 10px;
+            color: var(--star-muted);
+            margin-top: 2px;
+        }
+
+        /* Progress */
+        .progress-container {
+            margin-bottom: 40px;
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--star-muted);
+            letter-spacing: 1px;
+        }
+
+        .progress-track {
+            display: flex;
+            gap: 3px;
+        }
+
+        .progress-step {
+            flex: 1;
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            transition: background 0.5s;
+        }
+
+        .progress-step.done {
+            background: var(--signal-green);
+        }
+
+        .progress-step.active {
+            background: var(--thrust-orange);
+        }
+
+        /* Domain sections */
+        .domain-section {
+            display: none;
+        }
+
+        .domain-section.active {
+            display: block;
+        }
+
+        .domain-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            margin-bottom: 28px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .domain-badge {
+            flex-shrink: 0;
+        }
+
+        .domain-badge span {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            padding: 5px 14px;
+            border-radius: 100px;
+            letter-spacing: 1px;
+        }
+
+        .domain-title {
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .domain-desc {
+            font-size: 13px;
+            color: var(--star-dim);
+            line-height: 1.5;
+            font-weight: 300;
+            max-width: 600px;
+        }
+
+        .domain-frameworks {
+            display: flex;
+            gap: 4px;
+            margin-top: 8px;
+        }
+
+        .df-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--star-muted);
+            border: 1px solid var(--border);
+        }
+
+        /* Questions */
+        .question-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin-bottom: 12px;
+            transition: border-color 0.3s;
+        }
+
+        .question-card.answered {
+            border-color: rgba(52, 211, 153, 0.15);
+        }
+
+        .question-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .question-id {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--star-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .question-weight {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 9px;
+            color: var(--star-muted);
+            padding: 2px 6px;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+        }
+
+        .question-text {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+
+        .question-guidance {
+            font-size: 12px;
+            color: var(--star-muted);
+            line-height: 1.5;
+            margin-bottom: 14px;
+            font-weight: 300;
+            font-style: italic;
+        }
+
+        .maturity-options {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+
+        .mat-btn {
+            padding: 10px 6px;
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--star-muted);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s;
+            line-height: 1.3;
+        }
+
+        .mat-btn:hover {
+            border-color: var(--border-glow);
+            color: var(--star-white);
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .mat-btn.selected {
+            border-color: var(--thrust-orange);
+            color: var(--thrust-orange);
+            background: rgba(255, 123, 66, 0.06);
+        }
+
+        .mat-btn .score {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        /* Navigation */
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .domain-counter {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--star-muted);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 100px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, var(--thrust-orange), #ff9a5c);
+            color: var(--void);
+            box-shadow: 0 4px 20px rgba(255, 123, 66, 0.25);
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 28px rgba(255, 123, 66, 0.35);
+        }
+
+        .btn-prev {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--star-dim);
+        }
+
+        .btn-prev:hover {
+            border-color: var(--border-glow);
+            color: var(--star-white);
+        }
+
+        /* ====================== RESULTS ====================== */
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        /* Executive summary */
+        .exec-summary {
+            text-align: center;
+            padding: 48px 0 40px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 48px;
+        }
+
+        .exec-summary h2 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .overall-score {
+            font-size: 80px;
+            font-weight: 700;
+            letter-spacing: -2px;
+            margin: 16px 0 4px;
+        }
+
+        .maturity-level-name {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 13px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .score-context {
+            font-size: 13px;
+            color: var(--star-dim);
+            font-weight: 300;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Score gauge */
+        .gauge-row {
+            display: flex;
+            justify-content: center;
+            margin: 24px 0;
+            gap: 2px;
+        }
+
+        .gauge-seg {
+            width: 60px;
+            height: 6px;
+            border-radius: 3px;
+            opacity: 0.2;
+            transition: opacity 0.5s;
+        }
+
+        .gauge-seg.filled {
+            opacity: 1;
+        }
+
+        /* Domain scores grid */
+        .results-section {
+            margin-bottom: 48px;
+        }
+
+        .results-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .results-section-desc {
+            font-size: 12px;
+            color: var(--star-muted);
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+
+        .domain-scores-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .ds-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .ds-score {
+            font-size: 32px;
+            font-weight: 700;
+            font-family: 'IBM Plex Mono', monospace;
+            min-width: 56px;
+            text-align: center;
+        }
+
+        .ds-info {
+            flex: 1;
+        }
+
+        .ds-name {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .ds-bar-track {
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+
+        .ds-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .ds-level {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--star-muted);
+        }
+
+        /* Gap analysis */
+        .gap-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .gap-table th {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--star-muted);
+            letter-spacing: 1px;
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .gap-table td {
+            font-size: 13px;
+            padding: 14px 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            vertical-align: top;
+        }
+
+        .gap-table tr:hover {
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .gap-domain {
+            font-weight: 500;
+        }
+
+        .gap-score {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+        }
+
+        .gap-bar {
+            width: 80px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            overflow: hidden;
+            display: inline-flex;
+        }
+
+        .gap-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        .gap-impact {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 100px;
+        }
+
+        .impact-critical {
+            background: rgba(251, 113, 133, 0.1);
+            color: var(--rose);
+            border: 1px solid rgba(251, 113, 133, 0.15);
+        }
+
+        .impact-high {
+            background: rgba(255, 123, 66, 0.1);
+            color: var(--thrust-orange);
+            border: 1px solid rgba(255, 123, 66, 0.15);
+        }
+
+        .impact-medium {
+            background: rgba(251, 191, 36, 0.1);
+            color: var(--exhaust-gold);
+            border: 1px solid rgba(251, 191, 36, 0.15);
+        }
+
+        .impact-low {
+            background: rgba(52, 211, 153, 0.1);
+            color: var(--signal-green);
+            border: 1px solid rgba(52, 211, 153, 0.15);
+        }
+
+        /* Roadmap */
+        .roadmap-phases {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .phase-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 24px;
+            position: relative;
+        }
+
+        .phase-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .phase-card:nth-child(1)::before {
+            background: var(--rose);
+        }
+
+        .phase-card:nth-child(2)::before {
+            background: var(--exhaust-gold);
+        }
+
+        .phase-card:nth-child(3)::before {
+            background: var(--signal-green);
+        }
+
+        .phase-header {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            color: var(--star-muted);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .phase-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .phase-timeline {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--star-muted);
+            margin-bottom: 16px;
+        }
+
+        .phase-items {
+            list-style: none;
+        }
+
+        .phase-items li {
+            font-size: 12px;
+            color: var(--star-dim);
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            line-height: 1.4;
+            font-weight: 300;
+        }
+
+        .phase-items li:last-child {
+            border-bottom: none;
+        }
+
+        .phase-items li::before {
+            content: '→ ';
+            color: var(--star-muted);
+        }
+
+        /* Framework mapping */
+        .mapping-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+
+        .map-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 16px;
+        }
+
+        .map-fw {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .map-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .map-items {
+            font-size: 12px;
+            color: var(--star-dim);
+            line-height: 1.7;
+            font-weight: 300;
+        }
+
+        /* Footer */
+        .results-footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid var(--border);
+            margin-top: 48px;
+        }
+
+        .results-footer p {
+            font-size: 11px;
+            color: var(--star-muted);
+            line-height: 1.6;
+        }
+
+        .results-footer a {
+            color: var(--thrust-orange);
+            text-decoration: none;
+        }
+
+        @media (max-width: 768px) {
+            .maturity-options {
+                grid-template-columns: 1fr;
+            }
+
+            .domain-scores-grid,
+            .mapping-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .roadmap-phases {
+                grid-template-columns: 1fr;
+            }
+
+            .app {
+                padding: 24px 16px;
+            }
+
+            .levels-row {
+                grid-template-columns: repeat(5, 1fr);
+            }
+
+            .framework-tags {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="top-bar">
+        <a href="../" class="back-link">← ventsislava.com</a>
+        <span class="tool-title">Security Program Assessment</span>
+        <div class="framework-tags">
+            <span class="fw-tag fw-nist">NIST CSF</span>
+            <span class="fw-tag fw-iso">ISO 27001</span>
+            <span class="fw-tag fw-cism">CISM</span>
+            <span class="fw-tag fw-cisa">CISA</span>
+        </div>
+    </div>
+
+    <div class="app">
+        <div class="app-header">
+            <h1>Security Program Maturity Assessment</h1>
+            <p>A comprehensive evaluation of your organization's information security program across 10 domains. Rate
+                each control area to generate a maturity profile, gap analysis, and prioritized remediation roadmap
+                aligned to NIST CSF, ISO 27001, CISM, and CISA frameworks.</p>
+            <div class="methodology">
+                <div class="methodology-title">Assessment Methodology</div>
+                <p>Each question is rated on a 5-level maturity scale based on the CMMI model. The assessment covers
+                    governance, risk, operations, and compliance — the four pillars of a defensible security program.
+                    Results map to specific framework controls for audit readiness.</p>
+                <div class="levels-row">
+                    <div class="level-chip">
+                        <div class="num">1</div>
+                        <div class="lbl">Initial</div>
+                    </div>
+                    <div class="level-chip">
+                        <div class="num">2</div>
+                        <div class="lbl">Developing</div>
+                    </div>
+                    <div class="level-chip">
+                        <div class="num">3</div>
+                        <div class="lbl">Defined</div>
+                    </div>
+                    <div class="level-chip">
+                        <div class="num">4</div>
+                        <div class="lbl">Managed</div>
+                    </div>
+                    <div class="level-chip">
+                        <div class="num">5</div>
+                        <div class="lbl">Optimized</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-meta">
+                <span class="progress-label" id="progressLabel">DOMAIN 1 OF 10</span>
+                <span class="progress-label" id="progressPct">0%</span>
+            </div>
+            <div class="progress-track" id="progressBar"></div>
+        </div>
+
+        <div id="assessmentForm"></div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        const domains = [
+            {
+                id: 'governance', name: 'Security Governance & Leadership', color: 'var(--orbit-blue)',
+                desc: 'Information security governance structure, board-level oversight, strategy alignment, and organizational accountability.',
+                frameworks: ['CISM D1', 'ISO 27001 §5', 'NIST CSF GV'],
+                questions: [
+                    { text: 'Information security strategy is documented and aligned with business objectives.', guidance: 'Look for: Board-approved security strategy, annual review cycle, measurable security objectives tied to business outcomes.', weight: 'Critical' },
+                    { text: 'A formal governance structure exists with defined security roles, responsibilities, and reporting lines.', guidance: 'Look for: CISO reporting to C-suite, security steering committee, defined RACI matrix, regular governance meetings with documented minutes.', weight: 'Critical' },
+                    { text: 'Security policies and standards are comprehensive, approved by leadership, and reviewed at least annually.', guidance: 'Look for: Complete policy suite (acceptable use, data classification, access control, incident response), version control, executive sign-off.', weight: 'High' },
+                    { text: 'Key Risk Indicators and security metrics are reported to executive leadership regularly.', guidance: 'Look for: Monthly/quarterly security dashboards, KRI tracking (phishing click rate, patch SLA, MTTD/MTTR), board-level reporting cadence.', weight: 'High' }
+                ]
+            },
+            {
+                id: 'risk', name: 'Risk Management & Assessment', color: 'var(--thrust-orange)',
+                desc: 'Systematic identification, analysis, evaluation, and treatment of information security risks across the enterprise.',
+                frameworks: ['CISM D2', 'ISO 27001 §6.1', 'NIST CSF ID.RA'],
+                questions: [
+                    { text: 'A formal risk management framework is adopted with consistent methodology for risk identification and scoring.', guidance: 'Look for: FAIR, NIST 800-30, or ISO 27005 methodology; quantitative or semi-quantitative scoring; documented risk appetite statement.', weight: 'Critical' },
+                    { text: 'Risk assessments are performed regularly and triggered by significant changes to the environment.', guidance: 'Look for: Annual comprehensive assessments, event-driven assessments for new systems/vendors, integration with change management.', weight: 'Critical' },
+                    { text: 'A risk register is maintained with assigned owners, treatment plans, and target dates.', guidance: 'Look for: Centralized risk register, risk owner accountability, treatment plans (mitigate/accept/transfer/avoid), residual risk tracking.', weight: 'High' },
+                    { text: 'Risk acceptance decisions are documented and approved at the appropriate management level.', guidance: 'Look for: Formal risk acceptance process, authority matrix, time-bound acceptances with expiration dates, compensating controls documented.', weight: 'High' }
+                ]
+            },
+            {
+                id: 'program', name: 'Security Program Architecture', color: 'var(--signal-green)',
+                desc: 'Design, implementation, and continuous improvement of the information security program aligned to frameworks and business context.',
+                frameworks: ['CISM D3', 'ISO 27001 §7-8', 'NIST CSF PR'],
+                questions: [
+                    { text: 'The security program is built on a recognized framework with a control catalog mapped to business requirements.', guidance: 'Look for: NIST CSF, ISO 27001, or CIS Controls as the foundation; common controls framework mapping multiple compliance requirements.', weight: 'Critical' },
+                    { text: 'Security architecture reviews are integrated into the SDLC and change management processes.', guidance: 'Look for: Threat modeling in design phase, security requirements in user stories, architecture review board participation, secure coding standards.', weight: 'High' },
+                    { text: 'The program includes a formal security awareness and training program with role-based content.', guidance: 'Look for: Annual training for all employees, specialized training for developers/admins, phishing simulations, metrics tracking (completion rates, click rates).', weight: 'High' },
+                    { text: 'Program effectiveness is measured through defined metrics and subject to continuous improvement.', guidance: 'Look for: Maturity assessments, control testing results, audit findings trending, program roadmap updated based on measurement data.', weight: 'Medium' }
+                ]
+            },
+            {
+                id: 'iam', name: 'Identity & Access Management', color: 'var(--nebula-purple)',
+                desc: 'Identity lifecycle management, authentication controls, authorization models, and privileged access governance.',
+                frameworks: ['ISO 27001 A.9', 'NIST CSF PR.AC', 'SOC 2 CC6'],
+                questions: [
+                    { text: 'Access controls follow least-privilege principles with role-based access and regular certification reviews.', guidance: 'Look for: RBAC model, quarterly access reviews, automated provisioning/deprovisioning, SoD controls, access request workflow.', weight: 'Critical' },
+                    { text: 'Multi-factor authentication is enforced for all remote access, privileged accounts, and critical systems.', guidance: 'Look for: MFA coverage > 95%, phishing-resistant MFA (FIDO2/WebAuthn), conditional access policies, VPN MFA enforcement.', weight: 'Critical' },
+                    { text: 'Privileged access is managed through a PAM solution with session monitoring and just-in-time elevation.', guidance: 'Look for: PAM tool deployment, credential vaulting, session recording for admin access, JIT/JEA controls, break-glass procedures.', weight: 'High' },
+                    { text: 'Service accounts and API keys are inventoried, rotated on schedule, and scoped to minimum required permissions.', guidance: 'Look for: Service account inventory, automated rotation, secrets management (Vault, AWS Secrets Manager), no hard-coded credentials.', weight: 'High' }
+                ]
+            },
+            {
+                id: 'data', name: 'Data Protection & Privacy', color: 'var(--teal)',
+                desc: 'Data classification, encryption, data loss prevention, privacy controls, and regulatory compliance for data handling.',
+                frameworks: ['ISO 27001 A.8', 'NIST CSF PR.DS', 'GDPR/CCPA'],
+                questions: [
+                    { text: 'A data classification scheme is implemented with handling requirements for each sensitivity level.', guidance: 'Look for: Classification levels (Public, Internal, Confidential, Restricted), labeling standards, handling procedures, DLP policies aligned to classification.', weight: 'Critical' },
+                    { text: 'Encryption is enforced at rest and in transit for all sensitive data, with key management procedures.', guidance: 'Look for: TLS 1.2+ everywhere, AES-256 at rest, KMS with key rotation, certificate management, no legacy protocols in use.', weight: 'Critical' },
+                    { text: 'Data retention and disposal policies are defined and enforced with evidence of secure destruction.', guidance: 'Look for: Retention schedules per data type, automated retention enforcement, secure media disposal certificates, right-to-erasure process.', weight: 'High' },
+                    { text: 'Privacy impact assessments are performed for new data processing activities and systems.', guidance: 'Look for: PIA/DPIA process, data mapping/inventory, lawful basis documentation, privacy-by-design in new projects, DPO involvement.', weight: 'High' }
+                ]
+            },
+            {
+                id: 'secops', name: 'Security Operations & Monitoring', color: 'var(--cyan)',
+                desc: 'Continuous security monitoring, threat detection, vulnerability management, and security operations center capabilities.',
+                frameworks: ['NIST CSF DE', 'ISO 27001 A.12', 'CISA D4'],
+                questions: [
+                    { text: 'Centralized security monitoring covers all critical systems with defined detection rules and alert triage procedures.', guidance: 'Look for: SIEM/XDR deployment, log coverage > 90% of critical assets, documented use cases, 24/7 monitoring or defined coverage hours, alert tuning.', weight: 'Critical' },
+                    { text: 'Vulnerability management includes regular scanning, risk-based prioritization, and SLA-driven remediation.', guidance: 'Look for: Weekly/continuous scanning, CVSS + environmental scoring, remediation SLAs (Critical: 48hr, High: 7d, Medium: 30d), exception tracking.', weight: 'Critical' },
+                    { text: 'Threat intelligence is integrated into detection and response workflows.', guidance: 'Look for: TI feed integration, IOC enrichment, threat-informed defense, MITRE ATT&CK mapping, proactive threat hunting cadence.', weight: 'High' },
+                    { text: 'Endpoint detection and response is deployed across all endpoints with automated containment capabilities.', guidance: 'Look for: EDR/XDR agent coverage > 98%, automated isolation for high-confidence detections, forensic data retention, managed or 24/7 SOC.', weight: 'High' }
+                ]
+            },
+            {
+                id: 'incident', name: 'Incident Response & Recovery', color: 'var(--rose)',
+                desc: 'Incident response planning, execution, communication, recovery, and lessons learned processes.',
+                frameworks: ['CISM D4', 'ISO 27001 A.16', 'NIST CSF RS/RC'],
+                questions: [
+                    { text: 'An incident response plan exists with defined severity levels, escalation paths, and communication procedures.', guidance: 'Look for: Documented IRP with playbooks per incident type, severity matrix (P1-P4), RACI, internal/external notification templates, legal/PR coordination.', weight: 'Critical' },
+                    { text: 'Incident response capabilities are tested through tabletop exercises and simulated scenarios at least annually.', guidance: 'Look for: Annual tabletop exercises with executives, technical simulation exercises, red team/purple team engagements, results documented with action items.', weight: 'Critical' },
+                    { text: 'Incident metrics (MTTD, MTTR, recurrence rate) are tracked and used to drive program improvements.', guidance: 'Look for: KPI dashboard, trend analysis, root cause categorization, correlation to problem management, metrics reported to leadership.', weight: 'High' },
+                    { text: 'Business continuity and disaster recovery plans are documented, tested, and aligned with defined RTO/RPO.', guidance: 'Look for: BCP/DRP per critical service, defined RTO/RPO, annual DR tests with documented results, backups tested and validated regularly.', weight: 'Critical' }
+                ]
+            },
+            {
+                id: 'tprm', name: 'Third-Party Risk Management', color: 'var(--exhaust-gold)',
+                desc: 'Vendor risk assessment, ongoing monitoring, contractual security requirements, and supply chain risk management.',
+                frameworks: ['ISO 27001 A.15', 'NIST CSF ID.SC', 'SOC 2 CC9'],
+                questions: [
+                    { text: 'A formal third-party risk management program exists with tiered assessment methodology based on criticality.', guidance: 'Look for: Vendor risk tiers (Critical/High/Medium/Low), assessment frequency by tier, security questionnaires (SIG, CAIQ), SOC 2 report reviews.', weight: 'Critical' },
+                    { text: 'Contracts include security requirements, audit rights, breach notification obligations, and data handling clauses.', guidance: 'Look for: Standard security addendum, breach notification SLAs (24-72hr), right to audit, data return/destruction on termination, subprocessor controls.', weight: 'High' },
+                    { text: 'Ongoing vendor monitoring includes continuous risk signals and periodic reassessment.', guidance: 'Look for: Security ratings (BitSight, SecurityScorecard), annual reassessment cycle, breach news monitoring, SLA compliance tracking.', weight: 'High' },
+                    { text: 'Concentration risk and fourth-party dependencies are identified and managed.', guidance: 'Look for: Dependency mapping, concentration risk analysis (multiple vendors on same cloud), fourth-party risk visibility, exit strategies for critical vendors.', weight: 'Medium' }
+                ]
+            },
+            {
+                id: 'compliance', name: 'Compliance & Audit Readiness', color: 'var(--orbit-blue)',
+                desc: 'Regulatory compliance management, audit evidence collection, control testing, and continuous compliance monitoring.',
+                frameworks: ['CISA D1', 'ISO 27001 §9-10', 'SOC 2'],
+                questions: [
+                    { text: 'Applicable regulatory and compliance requirements are identified, mapped to controls, and tracked centrally.', guidance: 'Look for: Compliance obligation register, control-to-requirement mapping, gap tracking, regulatory change management process.', weight: 'Critical' },
+                    { text: 'Internal control assessments are performed regularly with documented testing procedures and evidence.', guidance: 'Look for: Control testing calendar, test procedures per control, evidence repository, exception management, management review of results.', weight: 'Critical' },
+                    { text: 'Audit evidence is collected continuously through automation rather than point-in-time gathering.', guidance: 'Look for: GRC platform (Drata, Vanta, AuditBoard), automated evidence collection, continuous compliance monitoring, real-time control status.', weight: 'High' },
+                    { text: 'Audit findings are tracked through remediation with root cause analysis and systemic improvements.', guidance: 'Look for: Finding tracker with owners and deadlines, root cause analysis for repeat findings, management action plans, finding aging reports.', weight: 'High' }
+                ]
+            },
+            {
+                id: 'culture', name: 'Security Culture & Workforce', color: 'var(--nebula-purple)',
+                desc: 'Security awareness, organizational culture, talent development, cross-functional collaboration, and change management.',
+                frameworks: ['NIST CSF GV.SC', 'ISO 27001 A.7', 'CISM D3'],
+                questions: [
+                    { text: 'Security awareness programs go beyond compliance training to drive behavioral change with measured outcomes.', guidance: 'Look for: Role-based training tracks, phishing simulation campaigns with trending metrics, security champions program, gamification, reward/recognition.', weight: 'High' },
+                    { text: 'Security is integrated into business processes rather than being perceived as a separate function.', guidance: 'Look for: Security embedded in project management, product development, procurement — not just IT; business unit security liaisons; "security as enabler" messaging.', weight: 'High' },
+                    { text: 'Cross-functional incident response and security planning involves business stakeholders.', guidance: 'Look for: Business representation in IR exercises, security input into business impact analysis, joint risk reviews, security advisory in M&A.', weight: 'Medium' },
+                    { text: 'Security workforce planning includes talent development, succession planning, and knowledge management.', guidance: 'Look for: Security team skills matrix, training budgets, certification support, cross-training plan, documented runbooks, knowledge base.', weight: 'Medium' }
+                ]
+            }
+        ];
+
+        const levels = [
+            { score: 1, label: 'Initial', desc: 'Ad hoc, reactive, undocumented' },
+            { score: 2, label: 'Developing', desc: 'Partially documented, inconsistent' },
+            { score: 3, label: 'Defined', desc: 'Documented, standardized, repeatable' },
+            { score: 4, label: 'Managed', desc: 'Measured, monitored, controlled' },
+            { score: 5, label: 'Optimized', desc: 'Continuous improvement, adaptive' }
+        ];
+
+        const levelNames = ['', 'Initial', 'Developing', 'Defined', 'Managed', 'Optimized'];
+        const answers = {};
+        let currentDomain = 0;
+
+        function init() {
+            const pb = document.getElementById('progressBar');
+            domains.forEach((_, i) => { const s = document.createElement('div'); s.className = 'progress-step'; s.id = `step-${i}`; pb.appendChild(s); });
+
+            const form = document.getElementById('assessmentForm');
+            domains.forEach((domain, di) => {
+                const section = document.createElement('div');
+                section.className = 'domain-section';
+                section.id = `domain-${di}`;
+
+                let qhtml = '';
+                domain.questions.forEach((q, qi) => {
+                    const key = `${di}-${qi}`;
+                    qhtml += `<div class="question-card" id="qcard-${key}">
+                    <div class="question-meta">
+                        <span class="question-id">${domain.id.toUpperCase()}-${qi + 1}</span>
+                        <span class="question-weight">${q.weight}</span>
+                    </div>
+                    <div class="question-text">${q.text}</div>
+                    <div class="question-guidance">${q.guidance}</div>
+                    <div class="maturity-options">
+                        ${levels.map(l => `<div class="mat-btn" onclick="selectAnswer('${key}', ${l.score}, this)">
+                            <span class="score">${l.score}</span>${l.label}
+                        </div>`).join('')}
+                    </div>
+                </div>`;
+                });
+
+                section.innerHTML = `
+                <div class="domain-header">
+                    <div class="domain-badge"><span style="background: ${domain.color}15; color: ${domain.color}; border: 1px solid ${domain.color}33;">${di + 1} / ${domains.length}</span></div>
+                    <div>
+                        <div class="domain-title">${domain.name}</div>
+                        <div class="domain-desc">${domain.desc}</div>
+                        <div class="domain-frameworks">${domain.frameworks.map(f => `<span class="df-tag">${f}</span>`).join('')}</div>
+                    </div>
+                </div>
+                ${qhtml}
+                <div class="nav-buttons">
+                    <span class="domain-counter">${di + 1} of ${domains.length} domains</span>
+                    <div class="btn-group">
+                        ${di > 0 ? '<button class="btn btn-prev" onclick="prevDomain()">← Previous</button>' : ''}
+                        <button class="btn btn-next" onclick="${di === domains.length - 1 ? 'showResults()' : 'nextDomain()'}">
+                            ${di === domains.length - 1 ? 'Generate Assessment →' : 'Next Domain →'}
+                        </button>
+                    </div>
+                </div>
+            `;
+                form.appendChild(section);
+            });
+
+            showDomain(0);
+        }
+
+        function selectAnswer(key, score, btn) {
+            answers[key] = score;
+            btn.parentElement.querySelectorAll('.mat-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            document.getElementById(`qcard-${key}`).classList.add('answered');
+        }
+
+        function updateProgress() {
+            const total = domains.reduce((a, d) => a + d.questions.length, 0);
+            const answered = Object.keys(answers).length;
+            document.getElementById('progressPct').textContent = Math.round(answered / total * 100) + '%';
+            document.getElementById('progressLabel').textContent = `DOMAIN ${currentDomain + 1} OF ${domains.length}`;
+            domains.forEach((_, i) => {
+                const s = document.getElementById(`step-${i}`);
+                s.className = 'progress-step';
+                if (i < currentDomain) s.classList.add('done');
+                if (i === currentDomain) s.classList.add('active');
+            });
+        }
+
+        function showDomain(i) {
+            document.querySelectorAll('.domain-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`domain-${i}`).classList.add('active');
+            currentDomain = i;
+            updateProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function nextDomain() { if (currentDomain < domains.length - 1) showDomain(currentDomain + 1); }
+        function prevDomain() { if (currentDomain > 0) showDomain(currentDomain - 1); }
+
+        function getDomainScore(di) {
+            const domain = domains[di];
+            let total = 0, count = 0;
+            domain.questions.forEach((_, qi) => { const v = answers[`${di}-${qi}`]; if (v) { total += v; count++; } });
+            return count > 0 ? total / count : 0;
+        }
+
+        function getScoreColor(score) {
+            if (score >= 4) return 'var(--signal-green)';
+            if (score >= 3) return 'var(--orbit-blue)';
+            if (score >= 2) return 'var(--exhaust-gold)';
+            return 'var(--rose)';
+        }
+
+        function getImpact(score) {
+            if (score < 2) return { label: 'CRITICAL', cls: 'impact-critical' };
+            if (score < 3) return { label: 'HIGH', cls: 'impact-high' };
+            if (score < 4) return { label: 'MEDIUM', cls: 'impact-medium' };
+            return { label: 'LOW', cls: 'impact-low' };
+        }
+
+        function showResults() {
+            document.querySelectorAll('.domain-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.progress-step').forEach(s => { s.className = 'progress-step done'; });
+            document.getElementById('progressLabel').textContent = 'ASSESSMENT COMPLETE';
+            document.getElementById('progressPct').textContent = '100%';
+
+            const scores = domains.map((_, i) => getDomainScore(i));
+            const overall = scores.reduce((a, b) => a + b, 0) / scores.length;
+            const overallLevel = Math.round(overall);
+            const sorted = scores.map((s, i) => ({ score: s, index: i })).sort((a, b) => a.score - b.score);
+
+            // Build results
+            let html = `
+        <div class="exec-summary">
+            <h2>Assessment Results</h2>
+            <div class="overall-score" style="color: ${getScoreColor(overall)};">${overall.toFixed(1)}</div>
+            <div class="maturity-level-name" style="color: ${getScoreColor(overall)};">${levelNames[overallLevel]} Maturity</div>
+            <div class="gauge-row">
+                ${[1, 2, 3, 4, 5].map(i => `<div class="gauge-seg ${i <= overallLevel ? 'filled' : ''}" style="background: ${getScoreColor(i)};"></div>`).join('')}
+            </div>
+            <div class="score-context">
+                ${overall < 2 ? 'Your security program is in early stages. Foundational governance, risk management, and operational controls need to be established before addressing advanced capabilities.' :
+                    overall < 3 ? 'Your program has emerging practices but lacks consistency and documentation. Focus on standardizing processes, establishing baselines, and ensuring repeatable controls.' :
+                        overall < 4 ? 'Your program has defined processes and controls. The next step is establishing metrics, continuous monitoring, and measurement-driven improvement.' :
+                            'Your program is well-managed with measurable controls. Focus on optimization, automation, and adaptive capabilities to maintain leadership.'}
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-section-title">Domain Maturity Profile</div>
+            <div class="results-section-desc">Maturity score across all 10 assessment domains</div>
+            <div class="domain-scores-grid">
+                ${domains.map((d, i) => {
+                                const s = scores[i];
+                                return `<div class="ds-card">
+                        <div class="ds-score" style="color: ${getScoreColor(s)};">${s.toFixed(1)}</div>
+                        <div class="ds-info">
+                            <div class="ds-name">${d.name}</div>
+                            <div class="ds-bar-track"><div class="ds-bar-fill" style="width: ${s / 5 * 100}%; background: ${d.color};"></div></div>
+                            <div class="ds-level">${levelNames[Math.round(s)]} · ${d.frameworks[0]}</div>
+                        </div>
+                    </div>`;
+                            }).join('')}
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-section-title">Gap Analysis</div>
+            <div class="results-section-desc">Domains ranked by improvement priority</div>
+            <table class="gap-table">
+                <thead><tr><th>RANK</th><th>DOMAIN</th><th>SCORE</th><th>MATURITY</th><th>GAP TO TARGET</th><th>IMPACT</th></tr></thead>
+                <tbody>
+                    ${sorted.map((item, rank) => {
+                                const d = domains[item.index];
+                                const s = item.score;
+                                const imp = getImpact(s);
+                                const gap = Math.max(0, 4 - s);
+                                return `<tr>
+                            <td style="color: var(--star-muted); font-family: 'IBM Plex Mono', monospace; font-size: 12px;">#${rank + 1}</td>
+                            <td class="gap-domain">${d.name}</td>
+                            <td class="gap-score" style="color: ${getScoreColor(s)};">${s.toFixed(1)}</td>
+                            <td style="color: var(--star-muted); font-size: 12px;">${levelNames[Math.round(s)]}</td>
+                            <td><div class="gap-bar"><div class="gap-bar-fill" style="width: ${gap / 4 * 100}%; background: ${getScoreColor(s)};"></div></div> <span style="font-size: 11px; color: var(--star-muted); font-family: 'IBM Plex Mono', monospace;">${gap > 0 ? '+' + gap.toFixed(1) : '—'}</span></td>
+                            <td><span class="gap-impact ${imp.cls}">${imp.label}</span></td>
+                        </tr>`;
+                            }).join('')}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="results-section">
+            <div class="results-section-title">Remediation Roadmap</div>
+            <div class="results-section-desc">Phased approach to improve security posture based on assessment gaps</div>
+            <div class="roadmap-phases">
+                <div class="phase-card">
+                    <div class="phase-header">PHASE 1</div>
+                    <div class="phase-title">Foundation</div>
+                    <div class="phase-timeline">0 – 90 days</div>
+                    <ul class="phase-items">
+                        ${sorted.slice(0, 3).map(item => {
+                                const d = domains[item.index];
+                                const weakQ = d.questions.reduce((weakest, q, qi) => {
+                                    const s = answers[`${item.index}-${qi}`] || 0;
+                                    return (!weakest || s < weakest.score) ? { q, score: s } : weakest;
+                                }, null);
+                                return `<li>${d.name}: ${weakQ && weakQ.score < 3 ? weakQ.q.text.substring(0, 80) + '...' : 'Establish baseline controls and documentation'}</li>`;
+                            }).join('')}
+                    </ul>
+                </div>
+                <div class="phase-card">
+                    <div class="phase-header">PHASE 2</div>
+                    <div class="phase-title">Standardization</div>
+                    <div class="phase-timeline">90 – 180 days</div>
+                    <ul class="phase-items">
+                        ${sorted.slice(3, 7).map(item => `<li>${domains[item.index].name}: Formalize processes and implement consistent controls</li>`).join('')}
+                    </ul>
+                </div>
+                <div class="phase-card">
+                    <div class="phase-header">PHASE 3</div>
+                    <div class="phase-title">Optimization</div>
+                    <div class="phase-timeline">180 – 365 days</div>
+                    <ul class="phase-items">
+                        ${sorted.slice(7).map(item => `<li>${domains[item.index].name}: Automate, measure, and continuously improve</li>`).join('')}
+                        <li>Establish continuous compliance monitoring</li>
+                        <li>Implement security program metrics and executive reporting</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section">
+            <div class="results-section-title">Framework Alignment</div>
+            <div class="results-section-desc">How this assessment maps to industry frameworks and certifications</div>
+            <div class="mapping-grid">
+                <div class="map-card">
+                    <div class="map-fw"><div class="map-dot" style="background: var(--nebula-purple);"></div>NIST Cybersecurity Framework</div>
+                    <div class="map-items">Govern (GV) → Governance & Culture · Identify (ID) → Risk & TPRM · Protect (PR) → IAM, Data, Program · Detect (DE) → SecOps · Respond/Recover (RS/RC) → Incident Response</div>
+                </div>
+                <div class="map-card">
+                    <div class="map-fw"><div class="map-dot" style="background: var(--orbit-blue);"></div>ISO 27001:2022</div>
+                    <div class="map-items">Clauses 4-10 → Governance, Risk, Program · Annex A Controls → IAM (A.9), Data (A.8), Operations (A.12), Incident (A.16), TPRM (A.15), Compliance (A.18)</div>
+                </div>
+                <div class="map-card">
+                    <div class="map-fw"><div class="map-dot" style="background: var(--signal-green);"></div>CISM (ISACA)</div>
+                    <div class="map-items">D1: Information Security Governance → Governance & Leadership · D2: Information Risk Management → Risk Management · D3: Security Program → Program Architecture & Culture · D4: Incident Management → Incident Response</div>
+                </div>
+                <div class="map-card">
+                    <div class="map-fw"><div class="map-dot" style="background: var(--thrust-orange);"></div>CISA (ISACA)</div>
+                    <div class="map-items">D1: Audit Process → Compliance & Audit · D2: IT Governance → Governance · D3: IS Acquisition → Program Architecture · D4: Operations & Resilience → SecOps & Incident · D5: Protection of Assets → IAM & Data</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-footer">
+            <p>Security Program Maturity Assessment v2.0 · 10 domains · 40 controls<br>
+            Aligned to NIST CSF 2.0 · ISO 27001:2022 · ISACA CISM · ISACA CISA<br>
+            Built by <a href="../">V. Zaharieva</a> · GRC & Security Operations</p>
+        </div>`;
+
+            document.getElementById('results').innerHTML = html;
+            document.getElementById('results').classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        init();
+    </script>
+</body>
+
+</html>

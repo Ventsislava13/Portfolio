@@ -24,7 +24,12 @@
     <nav id="navbar">
         <div class="container">
             <a href="#" class="nav-logo">V. ZAHARIEVA</a>
-            <ul class="nav-links">
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul class="nav-links" id="nav-links">
                 <li><a href="#trajectory">Trajectory</a></li>
                 <li><a href="#missions">Missions</a></li>
                 <li><a href="#systems">Systems</a></li>
@@ -145,7 +150,8 @@
                         <span class="blink"></span> Operational
                     </div>
                     <div class="mission-icon">🛡️</div>
-                    <h3 class="mission-name">AI Governance Risk Assessor</h3>
+                    <h3 class="mission-name"><a href="tools/ai-governance-assessor.html"
+                            style="color: inherit; text-decoration: none;">AI Governance Risk Assessor</a></h3>
                     <p class="mission-brief">Interactive web application applying the NIST AI Risk Management Framework
                         across Govern, Map, Measure, and Manage functions. Evaluates AI use cases through structured
                         risk assessments and produces risk-scored governance reports.</p>

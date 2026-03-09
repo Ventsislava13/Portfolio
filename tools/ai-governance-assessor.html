@@ -1,0 +1,2672 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Governance Risk Assessor — V. Zaharieva</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            /* Space Theme Palette — matching ventsislava.com */
+            --bg-primary: #04050a;
+            --bg-secondary: #080b15;
+            --bg-card: #0f1328;
+            --bg-card-hover: #141838;
+            --border: #1a1f3d;
+
+            --text-primary: #f0f2ff;
+            --text-secondary: #8b92b8;
+            --text-muted: #4a5180;
+
+            /* Status Colors */
+            --accent: #ff7b42;
+            --accent-glow: rgba(255, 123, 66, 0.12);
+            --accent-secondary: #2dd4bf;
+
+            /* Functional Colors */
+            --critical: #fb7185;
+            --critical-bg: rgba(251, 113, 133, 0.08);
+            --high: #ff7b42;
+            --high-bg: rgba(255, 123, 66, 0.08);
+            --medium: #fbbf24;
+            --medium-bg: rgba(251, 191, 36, 0.08);
+            --low: #34d399;
+            --low-bg: rgba(52, 211, 153, 0.08);
+
+            /* NIST Categories */
+            --govern: #8b5cf6;
+            --map: #2dd4bf;
+            --measure: #fbbf24;
+            --manage: #34d399;
+
+            --neon-glow: 0 0 10px rgba(255, 123, 66, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== NEBULA CLOUDS AND STARFIELD ===== */
+        .nebula-cloud {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+            mix-blend-mode: screen;
+            animation: drift 20s ease-in-out infinite;
+            opacity: 0.6;
+        }
+
+        .nebula-1 {
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+            top: -20%;
+            right: -15%;
+            animation-duration: 25s;
+        }
+
+        .nebula-2 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 70%);
+            bottom: 20%;
+            left: -10%;
+            animation-delay: -10s;
+            animation-duration: 35s;
+        }
+
+        .nebula-3 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 123, 66, 0.04) 0%, transparent 70%);
+            top: 40%;
+            right: 20%;
+            animation-delay: -18s;
+            animation-duration: 28s;
+        }
+
+        @keyframes drift {
+
+            0%,
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            33% {
+                transform: translate(40px, -30px) scale(1.05);
+            }
+
+            66% {
+                transform: translate(-20px, 40px) scale(0.95);
+            }
+        }
+
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== MISSION CONTROL: Header ===== */
+        .header {
+            text-align: left;
+            margin-bottom: 60px;
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            color: var(--low);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--low);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--low);
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        .header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 64px;
+            font-weight: 400;
+            line-height: 1;
+            color: var(--text-primary);
+            margin: 0;
+            letter-spacing: -1px;
+        }
+
+        .header h1 span {
+            color: var(--accent);
+        }
+
+        .header p {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px;
+            color: var(--text-secondary);
+            max-width: 500px;
+            margin: 0;
+            border-left: 2px solid var(--accent);
+            padding-left: 16px;
+        }
+
+        .header-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            /* Utilitarian corners */
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+
+
+        /* Use Case Selector */
+        .selector-section {
+            margin-bottom: 40px;
+        }
+
+        .selector-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        /* ===== MISSION CONTROL: 3D Cards ===== */
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 24px;
+            perspective: 1000px;
+            /* Enable 3D space */
+        }
+
+        .use-case-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            /* Industrial corners */
+            padding: 24px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.1s ease-out, box-shadow 0.3s ease, border-color 0.3s ease;
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Technical corner markers for cards */
+        .use-case-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .use-case-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 0%;
+            background: var(--accent);
+            transition: height 0.3s ease;
+        }
+
+        .use-case-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .use-case-card:hover::after {
+            height: 100%;
+        }
+
+        /* 3D Transform Elements */
+        .use-case-card:hover h3 {
+            transform: translateZ(20px);
+            color: var(--accent);
+        }
+
+        .use-case-card:hover .use-case-icon {
+            transform: translateZ(30px);
+            color: var(--accent);
+        }
+
+        .use-case-card:hover p {
+            transform: translateZ(10px);
+            color: var(--text-primary);
+        }
+
+        .use-case-card.active {
+            border-color: var(--accent);
+            background: var(--bg-card-hover);
+        }
+
+        .use-case-card.active::after {
+            height: 100%;
+            background: var(--accent);
+        }
+
+        .use-case-icon {
+            font-size: 24px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+            color: var(--text-muted);
+            transform-style: preserve-3d;
+        }
+
+        .use-case-card h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        .use-case-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+
+        /* Assessment Results */
+        .assessment {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .assessment.visible {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .assessment-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .assessment-title {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .overall-risk {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .overall-risk.critical {
+            background: var(--critical-bg);
+            color: var(--critical);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .overall-risk.high {
+            background: var(--high-bg);
+            color: var(--high);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+        }
+
+        .overall-risk.medium {
+            background: var(--medium-bg);
+            color: var(--medium);
+            border: 1px solid rgba(234, 179, 8, 0.3);
+        }
+
+        .risk-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .risk-dot.critical {
+            background: var(--critical);
+        }
+
+        .risk-dot.high {
+            background: var(--high);
+        }
+
+        .risk-dot.medium {
+            background: var(--medium);
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        /* NIST Function Tabs */
+        .nist-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .nist-tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nist-tab:hover {
+            border-color: var(--text-muted);
+        }
+
+        .nist-tab.active-govern {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: var(--govern);
+            color: var(--govern);
+        }
+
+        .nist-tab.active-map {
+            background: rgba(6, 182, 212, 0.15);
+            border-color: var(--map);
+            color: var(--map);
+        }
+
+        .nist-tab.active-measure {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: var(--measure);
+            color: var(--measure);
+        }
+
+        .nist-tab.active-manage {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--manage);
+            color: var(--manage);
+        }
+
+        .tab-count {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+        }
+
+        /* Risk Cards */
+        .risk-panel {
+            display: none;
+        }
+
+        .risk-panel.visible {
+            display: block;
+        }
+
+        .risk-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .risk-card:hover {
+            border-color: var(--text-muted);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .risk-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .risk-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .severity-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 100px;
+            /* Pill shape */
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-family: 'IBM Plex Mono', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .severity-badge::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 6px;
+            background: currentColor;
+            vertical-align: middle;
+            margin-top: -2px;
+        }
+
+        .severity-badge.critical {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--critical);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+            animation: pulse-badge 2s infinite;
+        }
+
+        @keyframes pulse-badge {
+
+            0%,
+            100% {
+                box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+                opacity: 1;
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+                opacity: 0.9;
+            }
+        }
+
+        .severity-badge.high {
+            background: rgba(249, 115, 22, 0.15);
+            color: var(--high);
+            border: 1px solid rgba(249, 115, 22, 0.4);
+        }
+
+        .severity-badge.medium {
+            background: rgba(234, 179, 8, 0.15);
+            color: var(--medium);
+            border: 1px solid rgba(234, 179, 8, 0.4);
+        }
+
+        .severity-badge.low {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--low);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .risk-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.7;
+        }
+
+        .controls-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .controls-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .controls-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .controls-list li {
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .controls-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+        }
+
+        .framework-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .framework-tag {
+            font-size: 11px;
+            padding: 4px 10px;
+            border-radius: 2px;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--accent-secondary);
+            border: 1px solid rgba(45, 212, 191, 0.3);
+            font-weight: 500;
+            font-family: 'IBM Plex Mono', monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .framework-tag::before {
+            content: '>_ ';
+            opacity: 0.6;
+            margin-right: 4px;
+        }
+
+        /* Summary Stats */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-number.critical-num {
+            color: var(--critical);
+        }
+
+        .stat-number.high-num {
+            color: var(--high);
+        }
+
+        .stat-number.medium-num {
+            color: var(--medium);
+        }
+
+        .stat-number.low-num {
+            color: var(--low);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Footer as Status Bar */
+        .footer {
+            margin-top: 80px;
+            padding: 20px 0;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-muted);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .footer-framework {
+            margin-top: 8px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 3px;
+        }
+
+        /* Back button */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            margin-bottom: 24px;
+        }
+
+        .back-btn:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 26px;
+            }
+
+            .use-case-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .assessment-header {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+        }
+
+        /* Top bar */
+        .top-bar {
+            padding: 14px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            background: rgba(4, 5, 10, 0.92);
+            backdrop-filter: blur(24px);
+            position: sticky;
+            top: 0;
+            z-index: 10000;
+        }
+
+        .back-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--accent);
+        }
+
+        .tool-title {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            color: var(--text-primary);
+        }
+
+        .fw-nist {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--govern);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        .fw-iso {
+            background: rgba(45, 212, 191, 0.1);
+            color: var(--map);
+            border: 1px solid rgba(45, 212, 191, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="top-bar">
+        <a href="../" class="back-link">← ventsislava.com</a>
+        <span class="tool-title">AI Governance Risk Assessor</span>
+        <div class="framework-tags">
+            <span class="fw-tag fw-nist">NIST AI RMF</span>
+            <span class="fw-tag fw-iso">ISO 42001</span>
+        </div>
+    </div>
+    <!-- Star field canvas -->
+    <canvas id="starfield"></canvas>
+
+    <!-- Nebula ambient clouds -->
+    <div class="nebula-cloud nebula-1"></div>
+    <div class="nebula-cloud nebula-2"></div>
+    <div class="nebula-cloud nebula-3"></div>
+
+    <div class="container">
+        <header class="header">
+            <div class="header-top">
+                <div class="header-badge">PORTFOLIO PROJECT</div>
+                <div class="system-status">
+                    <div class="status-dot"></div>
+                    SYSTEM STATUS: ACTIVE
+                </div>
+            </div>
+            <h1>AI Governance <br><span>Risk Assessor</span></h1>
+            <p>Evaluate AI use cases against the NIST AI Risk Management Framework. Select a scenario to generate a
+                structured risk assessment.</p>
+        </header>
+
+        <!-- Use Case Selection -->
+        <div id="selector" class="selector-section">
+            <div class="selector-label">Select an AI Use Case</div>
+            <div class="use-case-grid" id="useCaseGrid"></div>
+        </div>
+
+        <!-- Assessment Results -->
+        <div id="assessment" class="assessment"></div>
+
+        <footer class="footer">
+            <div class="footer-left">
+                SYSTEM ID: RMF-GOV-2024 // OPERATOR: V.ZAHARIEVA
+            </div>
+            <div class="footer-right">
+                STATUS: ONLINE // TAXONOMY: NIST AI RMF 1.0
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // ============================================
+        // PRE-BUILT USE CASES & RISK ASSESSMENTS
+        // ============================================
+        const useCases = [
+            {
+                id: "support-summary",
+                icon: "💬",
+                title: "Customer Support Summarization",
+                description: "Using LLMs to auto-summarize customer support tickets for agent handoff",
+                overallRisk: "high",
+                stats: { critical: 1, high: 3, medium: 3, low: 1 },
+                risks: {
+                    govern: [
+                        {
+                            title: "Accountability Gap for AI-Generated Summaries",
+                            severity: "high",
+                            description: "No clear ownership for decisions made based on AI-generated summaries. If a summary omits critical context and leads to a poor customer outcome, responsibility is undefined across Product, Engineering, and Support teams.",
+                            controls: [
+                                "Define RACI matrix for AI output ownership across teams",
+                                "Establish escalation policy for AI-influenced decisions",
+                                "Document acceptable use policy specific to support summarization"
+                            ],
+                            frameworks: ["NIST AI RMF GV-1", "SOC 2 CC1.1", "ISO 42001"]
+                        },
+                        {
+                            title: "Missing AI Governance Policy",
+                            severity: "medium",
+                            description: "Organization may lack a formal AI governance policy that covers LLM usage, data handling expectations, and risk tolerance thresholds for AI-generated content in customer-facing workflows.",
+                            controls: [
+                                "Draft AI Acceptable Use Policy covering LLM deployments",
+                                "Integrate AI risk into existing risk register",
+                                "Annual review cycle for AI governance documentation"
+                            ],
+                            frameworks: ["NIST AI RMF GV-2", "NIST AI RMF GV-4", "ISO 42001 A.4"]
+                        }
+                    ],
+                    map: [
+                        {
+                            title: "PII Exposure in Summarization Pipeline",
+                            severity: "critical",
+                            description: "Customer support tickets frequently contain PII (names, emails, account numbers, payment details). Sending this data to an LLM — especially a third-party API — creates data leakage risk and potential GDPR/CCPA violations.",
+                            controls: [
+                                "Implement PII detection and redaction before LLM processing",
+                                "Use data classification to route sensitive tickets away from AI",
+                                "Enforce data processing agreements with LLM providers",
+                                "Conduct Data Protection Impact Assessment (DPIA)"
+                            ],
+                            frameworks: ["GDPR Art. 35", "CCPA §1798.100", "SOC 2 CC6.1", "NIST AI RMF MP-2"]
+                        },
+                        {
+                            title: "Context Loss and Hallucination Risk",
+                            severity: "high",
+                            description: "LLMs may omit critical details, fabricate resolution steps, or mischaracterize customer sentiment — leading to incorrect agent actions and degraded customer experience.",
+                            controls: [
+                                "Human-in-the-loop review required before action on summaries",
+                                "Implement confidence scoring for generated summaries",
+                                "A/B test AI summaries against human summaries for accuracy"
+                            ],
+                            frameworks: ["NIST AI RMF MP-3", "NIST AI RMF MP-4"]
+                        },
+                        {
+                            title: "Third-Party Model Dependency",
+                            severity: "medium",
+                            description: "Reliance on external LLM provider (e.g., OpenAI, Anthropic) introduces supply chain risk — model changes, API deprecation, or provider outages can disrupt support operations.",
+                            controls: [
+                                "Include AI providers in Third-Party Risk Management program",
+                                "Evaluate vendor SOC 2 reports and data handling practices",
+                                "Design fallback workflow for when AI service is unavailable"
+                            ],
+                            frameworks: ["NIST AI RMF MP-5", "SOC 2 CC9.2", "NIST CSF ID.SC"]
+                        }
+                    ],
+                    measure: [
+                        {
+                            title: "No Accuracy Baseline Established",
+                            severity: "high",
+                            description: "Without metrics measuring summary accuracy, completeness, and faithfulness, the organization cannot quantify AI risk or demonstrate improvement over time.",
+                            controls: [
+                                "Define accuracy KPIs: completeness, factual correctness, sentiment accuracy",
+                                "Implement regular human evaluation of random sample of AI summaries",
+                                "Track hallucination rate and trend over time",
+                                "Establish minimum accuracy threshold for continued deployment"
+                            ],
+                            frameworks: ["NIST AI RMF MS-1", "NIST AI RMF MS-2"]
+                        },
+                        {
+                            title: "Bias Detection Gaps",
+                            severity: "medium",
+                            description: "The model may summarize tickets differently based on customer demographics, language patterns, or cultural expressions — potentially leading to unequal service quality.",
+                            controls: [
+                                "Audit summary quality across demographic segments",
+                                "Monitor for differential treatment in escalation recommendations",
+                                "Implement fairness metrics as part of model evaluation"
+                            ],
+                            frameworks: ["NIST AI RMF MS-3", "EU AI Act Art. 10"]
+                        }
+                    ],
+                    manage: [
+                        {
+                            title: "Incident Response for AI Failures",
+                            severity: "medium",
+                            description: "No defined playbook for responding to AI-specific incidents — such as a model generating harmful summaries, leaking data, or systematically misclassifying urgent tickets.",
+                            controls: [
+                                "Create AI-specific incident response runbook",
+                                "Define kill switch process to disable AI summarization immediately",
+                                "Include AI incidents in existing incident management program",
+                                "Conduct tabletop exercise for AI failure scenarios"
+                            ],
+                            frameworks: ["NIST AI RMF MG-2", "NIST AI RMF MG-3", "SOC 2 CC7.3"]
+                        },
+                        {
+                            title: "User Training and Awareness",
+                            severity: "low",
+                            description: "Support agents may over-rely on AI summaries without critical review, creating automation bias. Training is needed to ensure agents treat summaries as drafts, not facts.",
+                            controls: [
+                                "Develop agent training on AI limitations and review expectations",
+                                "Display confidence indicators alongside AI summaries",
+                                "Periodic reminders that AI summaries require human validation"
+                            ],
+                            frameworks: ["NIST AI RMF MG-4", "ISO 42001 A.8"]
+                        }
+                    ]
+                }
+            },
+            {
+                id: "resume-screening",
+                icon: "📋",
+                title: "AI Resume Screening",
+                description: "Using ML models to screen and rank job applicants for hiring decisions",
+                overallRisk: "critical",
+                stats: { critical: 2, high: 3, medium: 2, low: 1 },
+                risks: {
+                    govern: [
+                        {
+                            title: "Regulatory Non-Compliance (NYC Local Law 144)",
+                            severity: "critical",
+                            description: "Automated employment decision tools (AEDTs) are subject to specific regulations — including NYC Local Law 144, which requires bias audits and candidate notification. Non-compliance carries significant legal and reputational risk.",
+                            controls: [
+                                "Conduct annual independent bias audit as required by law",
+                                "Publish audit results on company careers page",
+                                "Notify all candidates that AI is used in screening process",
+                                "Maintain legal review of all jurisdictions where AI screening is used"
+                            ],
+                            frameworks: ["NYC LL 144", "EU AI Act Art. 6 (High-Risk)", "EEOC Guidance", "NIST AI RMF GV-1"]
+                        },
+                        {
+                            title: "Undefined AI Ethics Policy for Hiring",
+                            severity: "high",
+                            description: "Organization lacks formal policy defining ethical guardrails for AI in hiring — including what factors the model may/may not consider, how decisions are reviewed, and who is accountable for outcomes.",
+                            controls: [
+                                "Create AI in Hiring policy with prohibited factors and review process",
+                                "Establish AI Ethics Committee or review board for HR AI tools",
+                                "Document decision authority: AI recommends, human decides"
+                            ],
+                            frameworks: ["NIST AI RMF GV-2", "NIST AI RMF GV-6", "ISO 42001 A.3"]
+                        }
+                    ],
+                    map: [
+                        {
+                            title: "Demographic Bias in Training Data",
+                            severity: "critical",
+                            description: "Historical hiring data inherently reflects past biases. Models trained on this data will perpetuate discrimination against protected classes — by gender, race, age, disability status, or educational background.",
+                            controls: [
+                                "Conduct bias testing across all protected categories before deployment",
+                                "Use adversarial debiasing techniques in model training",
+                                "Implement human override for any candidate filtered out by AI",
+                                "Regular re-evaluation of model with updated fairness metrics"
+                            ],
+                            frameworks: ["NIST AI RMF MP-3", "EU AI Act Art. 10", "Title VII", "EEOC 4/5ths Rule"]
+                        },
+                        {
+                            title: "Proxy Discrimination Through Resume Features",
+                            severity: "high",
+                            description: "Even without explicit demographic inputs, models can discriminate through proxy features — university names, zip codes, language patterns, or extracurricular activities that correlate with protected characteristics.",
+                            controls: [
+                                "Audit feature importance to identify proxy variables",
+                                "Remove or neutralize features with high correlation to protected classes",
+                                "Test model outputs with synthetic resumes varying only demographic signals"
+                            ],
+                            frameworks: ["NIST AI RMF MP-4", "EEOC Disparate Impact", "EU AI Act Art. 14"]
+                        },
+                        {
+                            title: "Candidate Data Privacy",
+                            severity: "high",
+                            description: "Processing candidate resumes through AI systems involves handling significant personal data. Candidates may not have consented to AI processing, and data retention policies may not account for AI training data.",
+                            controls: [
+                                "Obtain explicit consent for AI processing in application flow",
+                                "Define data retention limits for AI-processed candidate data",
+                                "Ensure right-to-deletion extends to AI training datasets",
+                                "DPIA required before deployment"
+                            ],
+                            frameworks: ["GDPR Art. 22", "GDPR Art. 35", "CCPA §1798.100", "NIST AI RMF MP-2"]
+                        }
+                    ],
+                    measure: [
+                        {
+                            title: "No Fairness Metrics Defined",
+                            severity: "medium",
+                            description: "Without quantitative fairness metrics (demographic parity, equalized odds, calibration across groups), the organization cannot prove the model treats candidates equitably.",
+                            controls: [
+                                "Define fairness metrics and acceptable thresholds",
+                                "Implement automated fairness monitoring in production",
+                                "Quarterly fairness audit with results reported to leadership"
+                            ],
+                            frameworks: ["NIST AI RMF MS-2", "NIST AI RMF MS-3", "NYC LL 144 §5-301"]
+                        },
+                        {
+                            title: "Model Drift Detection",
+                            severity: "medium",
+                            description: "As applicant pools change over time, model performance and fairness characteristics may drift — potentially introducing new biases or degrading screening quality without visible indicators.",
+                            controls: [
+                                "Implement continuous monitoring for model performance drift",
+                                "Set alert thresholds for fairness metric degradation",
+                                "Scheduled model retraining with updated data and bias checks"
+                            ],
+                            frameworks: ["NIST AI RMF MS-1", "NIST AI RMF MS-4"]
+                        }
+                    ],
+                    manage: [
+                        {
+                            title: "Human Override and Appeal Process",
+                            severity: "high",
+                            description: "Candidates rejected by AI screening have no mechanism to appeal or request human review. GDPR Article 22 provides the right not to be subject to solely automated decisions with legal effects.",
+                            controls: [
+                                "Implement mandatory human review for all AI rejections",
+                                "Create candidate appeal process with human decision-maker",
+                                "Log all AI recommendations and human overrides for audit trail"
+                            ],
+                            frameworks: ["GDPR Art. 22", "EU AI Act Art. 14", "NIST AI RMF MG-2"]
+                        },
+                        {
+                            title: "Vendor Risk for AI Screening Tools",
+                            severity: "low",
+                            description: "If using a third-party AI screening vendor, the organization inherits the vendor's bias risks, data handling practices, and model opacity — often without visibility into model internals.",
+                            controls: [
+                                "Include AI vendors in TPRM program with AI-specific questionnaire",
+                                "Require vendor to provide bias audit results",
+                                "Contractual right to audit vendor's AI model performance"
+                            ],
+                            frameworks: ["NIST AI RMF MG-3", "SOC 2 CC9.2"]
+                        }
+                    ]
+                }
+            },
+            {
+                id: "fraud-detection",
+                icon: "🛡️",
+                title: "Fraud Detection Engine",
+                description: "ML models detecting fraudulent transactions in real-time payment processing",
+                overallRisk: "high",
+                stats: { critical: 1, high: 3, medium: 3, low: 1 },
+                risks: {
+                    govern: [
+                        {
+                            title: "Model Decision Authority Not Defined",
+                            severity: "high",
+                            description: "Unclear whether the model can autonomously block transactions or only flag them. Autonomous blocking without human oversight creates regulatory risk under financial services regulations.",
+                            controls: [
+                                "Define decision authority levels: flag-only vs auto-block thresholds",
+                                "Document model governance in compliance documentation",
+                                "Establish review cadence for auto-block decisions"
+                            ],
+                            frameworks: ["NIST AI RMF GV-1", "PCI DSS 6.4", "FFIEC AI Guidance"]
+                        }
+                    ],
+                    map: [
+                        {
+                            title: "False Positive Impact on Legitimate Customers",
+                            severity: "critical",
+                            description: "Aggressive fraud detection disproportionately blocks legitimate transactions from underbanked populations, international customers, and users with non-standard transaction patterns — creating discriminatory financial outcomes.",
+                            controls: [
+                                "Monitor false positive rates segmented by customer demographics",
+                                "Implement graduated response: flag → verify → block",
+                                "Create rapid unblock process for false positives",
+                                "Regular fairness audit across customer segments"
+                            ],
+                            frameworks: ["ECOA", "Fair Lending Act", "NIST AI RMF MP-3", "NIST AI RMF MP-5"]
+                        },
+                        {
+                            title: "Training Data Poisoning Risk",
+                            severity: "high",
+                            description: "Adversaries may deliberately manipulate transaction patterns to poison the training data — teaching the model to ignore specific fraud patterns or flag legitimate activity.",
+                            controls: [
+                                "Implement data integrity checks on training pipelines",
+                                "Anomaly detection on training data distributions",
+                                "Adversarial testing program for fraud model robustness"
+                            ],
+                            frameworks: ["NIST AI RMF MP-4", "NIST CSF PR.DS", "PCI DSS 6.5"]
+                        },
+                        {
+                            title: "Model Explainability for Regulators",
+                            severity: "high",
+                            description: "Financial regulators may require explanation of why specific transactions were blocked. Black-box ML models cannot provide the decision transparency required under fair lending laws.",
+                            controls: [
+                                "Implement SHAP or LIME explanations for individual decisions",
+                                "Maintain decision audit log with feature contributions",
+                                "Use interpretable model architectures where possible"
+                            ],
+                            frameworks: ["ECOA", "NIST AI RMF MP-5", "FFIEC Model Risk Mgmt"]
+                        }
+                    ],
+                    measure: [
+                        {
+                            title: "Performance Monitoring Gaps",
+                            severity: "medium",
+                            description: "Fraud patterns evolve rapidly. Without continuous monitoring, model accuracy degrades and new fraud vectors go undetected while legacy patterns generate false positives.",
+                            controls: [
+                                "Real-time monitoring dashboard for precision, recall, and F1",
+                                "Alert on performance degradation beyond defined thresholds",
+                                "Monthly model performance review with fraud operations team"
+                            ],
+                            frameworks: ["NIST AI RMF MS-1", "NIST AI RMF MS-2"]
+                        },
+                        {
+                            title: "Adversarial Robustness Testing",
+                            severity: "medium",
+                            description: "The model has not been tested against adversarial attacks — sophisticated fraud rings may already be probing detection boundaries to find evasion strategies.",
+                            controls: [
+                                "Conduct red team exercises against fraud detection model",
+                                "Test model against known adversarial attack techniques",
+                                "Implement model versioning and rollback capability"
+                            ],
+                            frameworks: ["NIST AI RMF MS-4", "NIST CSF DE.CM"]
+                        },
+                        {
+                            title: "Disparate Impact Measurement",
+                            severity: "medium",
+                            description: "No quantitative assessment of whether fraud blocking rates differ across protected demographic groups — required to demonstrate fair lending compliance.",
+                            controls: [
+                                "Implement demographic parity analysis on block rates",
+                                "Quarterly disparate impact reporting",
+                                "Threshold alerts for disproportionate impact on any segment"
+                            ],
+                            frameworks: ["ECOA", "NIST AI RMF MS-3"]
+                        }
+                    ],
+                    manage: [
+                        {
+                            title: "Incident Response for Model Failures",
+                            severity: "high",
+                            description: "No playbook for responding to model failures — a malfunctioning model could either allow massive fraud through or block thousands of legitimate transactions simultaneously.",
+                            controls: [
+                                "Create AI-specific incident response runbook for fraud model",
+                                "Define kill switch to revert to rules-based detection",
+                                "Establish communication protocol for customer impact events",
+                                "Post-incident review process for model-related incidents"
+                            ],
+                            frameworks: ["NIST AI RMF MG-2", "PCI DSS 12.10", "NIST CSF RS.RP"]
+                        },
+                        {
+                            title: "Customer Communication Protocol",
+                            severity: "low",
+                            description: "Customers whose transactions are blocked need clear, timely communication — but current process references 'system flagging' without transparency about AI involvement.",
+                            controls: [
+                                "Design customer-facing notification that acknowledges AI screening",
+                                "Provide easy dispute resolution path",
+                                "Train support team on AI decision explanations"
+                            ],
+                            frameworks: ["NIST AI RMF MG-4", "CFPB Guidance"]
+                        }
+                    ]
+                }
+            },
+            {
+                id: "content-generation",
+                icon: "✍️",
+                title: "AI Marketing Content Generation",
+                description: "Using LLMs to generate marketing copy, email campaigns, and social media content",
+                overallRisk: "medium",
+                stats: { critical: 0, high: 2, medium: 4, low: 2 },
+                risks: {
+                    govern: [
+                        {
+                            title: "Content Approval Workflow Missing",
+                            severity: "medium",
+                            description: "No formalized approval process for AI-generated content before publication. Without review gates, hallucinated claims, brand misalignment, or legally problematic statements may reach customers.",
+                            controls: [
+                                "Establish mandatory human review before any AI content is published",
+                                "Define approval matrix by content type and audience",
+                                "Document AI content guidelines and brand guardrails"
+                            ],
+                            frameworks: ["NIST AI RMF GV-1", "FTC Endorsement Guides"]
+                        },
+                        {
+                            title: "AI Disclosure Requirements",
+                            severity: "medium",
+                            description: "Emerging regulations and platform policies may require disclosure when content is AI-generated. Failure to disclose could violate FTC guidance and erode customer trust.",
+                            controls: [
+                                "Monitor regulatory landscape for AI disclosure requirements",
+                                "Implement internal labeling system for AI-generated content",
+                                "Define disclosure policy aligned with FTC and platform guidelines"
+                            ],
+                            frameworks: ["FTC Act §5", "EU AI Act Art. 52", "NIST AI RMF GV-4"]
+                        }
+                    ],
+                    map: [
+                        {
+                            title: "Brand and Reputational Risk",
+                            severity: "high",
+                            description: "LLMs may generate content that contradicts brand messaging, makes unsupported product claims, or uses tone inappropriate for the audience — creating legal liability and reputation damage.",
+                            controls: [
+                                "Fine-tune prompts with brand voice guidelines and constraints",
+                                "Implement content quality scoring before publication",
+                                "Maintain prohibited topics and claims list",
+                                "Regular audit of published AI content against brand standards"
+                            ],
+                            frameworks: ["NIST AI RMF MP-3", "FTC Act §5"]
+                        },
+                        {
+                            title: "Intellectual Property Risks",
+                            severity: "high",
+                            description: "AI-generated content may inadvertently reproduce copyrighted material, trademarks, or proprietary competitor content — exposing the organization to IP infringement claims.",
+                            controls: [
+                                "Run plagiarism detection on AI-generated content",
+                                "Legal review of AI content policies and ownership",
+                                "Document AI's role in content creation for IP clarity",
+                                "Monitor legal landscape on AI-generated content copyright"
+                            ],
+                            frameworks: ["NIST AI RMF MP-5", "DMCA", "Copyright Act"]
+                        },
+                        {
+                            title: "Data Leakage Through Prompts",
+                            severity: "medium",
+                            description: "Marketing teams may include confidential product roadmaps, pricing strategies, or customer data in prompts — inadvertently sharing proprietary information with third-party AI providers.",
+                            controls: [
+                                "Train marketing teams on safe prompting practices",
+                                "Define data classification rules for AI prompt content",
+                                "Use enterprise AI agreements with data protection clauses"
+                            ],
+                            frameworks: ["NIST AI RMF MP-2", "SOC 2 CC6.1"]
+                        }
+                    ],
+                    measure: [
+                        {
+                            title: "Content Quality Metrics",
+                            severity: "medium",
+                            description: "No quantitative framework for measuring AI content quality vs human-written content — making it impossible to evaluate whether AI is improving or degrading marketing effectiveness.",
+                            controls: [
+                                "A/B test AI vs human content on engagement metrics",
+                                "Track factual accuracy rate of AI-generated claims",
+                                "Monitor customer sentiment on AI-generated campaigns"
+                            ],
+                            frameworks: ["NIST AI RMF MS-1", "NIST AI RMF MS-2"]
+                        },
+                        {
+                            title: "Bias in Generated Content",
+                            severity: "medium",
+                            description: "AI may generate content that inadvertently excludes, stereotypes, or misrepresents certain demographics — creating DEI and brand risks.",
+                            controls: [
+                                "Audit AI content for demographic representation",
+                                "Include diverse perspectives in prompt design and review",
+                                "Periodic bias assessment of content portfolio"
+                            ],
+                            frameworks: ["NIST AI RMF MS-3"]
+                        }
+                    ],
+                    manage: [
+                        {
+                            title: "Rapid Takedown Process",
+                            severity: "low",
+                            description: "If problematic AI-generated content goes live, the organization needs a rapid response process to identify, remove, and remediate the content before it spreads.",
+                            controls: [
+                                "Define content incident response process with SLA",
+                                "Maintain ability to bulk-remove AI-generated content",
+                                "Post-incident review for content failures"
+                            ],
+                            frameworks: ["NIST AI RMF MG-2", "NIST AI RMF MG-3"]
+                        },
+                        {
+                            title: "Team Enablement and Training",
+                            severity: "low",
+                            description: "Marketing team lacks formal training on responsible AI usage — including prompt engineering, output validation, and understanding model limitations.",
+                            controls: [
+                                "Develop responsible AI training for marketing team",
+                                "Create prompt library with tested, approved templates",
+                                "Establish AI champion role within marketing team"
+                            ],
+                            frameworks: ["NIST AI RMF MG-4", "ISO 42001 A.8"]
+                        }
+                    ]
+                }
+            },
+            {
+                id: "code-generation",
+                icon: "🤖",
+                title: "AI-Assisted Code Generation",
+                description: "Developers using AI copilots (Copilot, Cursor) to generate production code",
+                overallRisk: "high",
+                stats: { critical: 1, high: 3, medium: 2, low: 2 },
+                risks: {
+                    govern: [
+                        {
+                            title: "Secure Development Lifecycle Integration",
+                            severity: "high",
+                            description: "AI-generated code bypasses traditional SDLC controls — code review, security scanning, and architectural review may not account for AI-specific risks like embedded vulnerabilities or license violations.",
+                            controls: [
+                                "Update SDLC policy to include AI code generation controls",
+                                "Require security scan on all AI-generated code blocks",
+                                "Mandate code review regardless of AI assistance level",
+                                "Document AI tool usage in development standards"
+                            ],
+                            frameworks: ["NIST AI RMF GV-1", "SOC 2 CC8.1", "PCI DSS 6.3", "NIST SSDF"]
+                        },
+                        {
+                            title: "Acceptable Use Policy for AI Dev Tools",
+                            severity: "medium",
+                            description: "No formal policy governing which AI tools developers may use, what code/data may be shared with AI services, and what restrictions apply to AI-generated code in production.",
+                            controls: [
+                                "Create AI Development Tools Acceptable Use Policy",
+                                "Define approved AI tools list and configuration requirements",
+                                "Specify data sharing restrictions with AI providers"
+                            ],
+                            frameworks: ["NIST AI RMF GV-2", "NIST AI RMF GV-4"]
+                        }
+                    ],
+                    map: [
+                        {
+                            title: "Source Code and IP Leakage",
+                            severity: "critical",
+                            description: "Developers sharing proprietary source code, API keys, internal documentation, or architecture details with cloud-based AI tools — exposing trade secrets and potentially violating customer NDAs.",
+                            controls: [
+                                "Deploy AI tools with enterprise data protection agreements",
+                                "Implement DLP controls on AI tool data flows",
+                                "Use self-hosted or air-gapped AI tools for sensitive projects",
+                                "Block AI tool access to repositories containing customer data"
+                            ],
+                            frameworks: ["SOC 2 CC6.1", "NIST AI RMF MP-2", "NIST CSF PR.DS"]
+                        },
+                        {
+                            title: "Vulnerability Introduction",
+                            severity: "high",
+                            description: "AI-generated code may contain security vulnerabilities — SQL injection, XSS, hardcoded credentials, insecure defaults — that appear correct but introduce exploitable weaknesses.",
+                            controls: [
+                                "Mandatory SAST/DAST scanning on all AI-generated code",
+                                "Security-focused code review for AI-assisted pull requests",
+                                "Developer training on common AI code generation vulnerabilities",
+                                "Track vulnerability rate in AI-generated vs human code"
+                            ],
+                            frameworks: ["NIST AI RMF MP-3", "PCI DSS 6.5", "OWASP Top 10"]
+                        },
+                        {
+                            title: "Open Source License Compliance",
+                            severity: "high",
+                            description: "AI models trained on public repositories may generate code under GPL, AGPL, or other copyleft licenses — inadvertently introducing license obligations into proprietary software.",
+                            controls: [
+                                "Run license scanning on AI-generated code",
+                                "Legal review of AI tool terms regarding generated code IP",
+                                "Implement SCA (Software Composition Analysis) in CI/CD pipeline"
+                            ],
+                            frameworks: ["NIST AI RMF MP-5", "SOC 2 CC8.1"]
+                        }
+                    ],
+                    measure: [
+                        {
+                            title: "Code Quality Metrics for AI Output",
+                            severity: "medium",
+                            description: "No baseline measurement comparing AI-generated code quality (bugs, vulnerabilities, maintainability) against human-written code — making it impossible to assess whether AI tools improve or degrade code quality.",
+                            controls: [
+                                "Track defect rate by AI-assisted vs manual code",
+                                "Monitor security vulnerability density in AI-generated PRs",
+                                "Measure code review rejection rate for AI-assisted submissions"
+                            ],
+                            frameworks: ["NIST AI RMF MS-1", "NIST AI RMF MS-2"]
+                        },
+                        {
+                            title: "Developer Over-Reliance Detection",
+                            severity: "medium",
+                            description: "Without metrics, organizations cannot detect if developers are accepting AI suggestions without critical review — creating automation bias where AI-generated vulnerabilities pass through unchecked.",
+                            controls: [
+                                "Track AI suggestion acceptance rate per developer",
+                                "Monitor correlation between acceptance rate and defect rate",
+                                "Include AI-awareness questions in code review checklists"
+                            ],
+                            frameworks: ["NIST AI RMF MS-3"]
+                        }
+                    ],
+                    manage: [
+                        {
+                            title: "Incident Response for AI-Introduced Vulnerabilities",
+                            severity: "low",
+                            description: "No specific process for responding to vulnerabilities discovered to be AI-generated — including tracing other code from the same AI session and assessing broader exposure.",
+                            controls: [
+                                "Extend vulnerability management to track AI-generated origin",
+                                "Create process to audit related AI code when vulnerability found",
+                                "Include AI code provenance in incident post-mortems"
+                            ],
+                            frameworks: ["NIST AI RMF MG-2", "SOC 2 CC7.3"]
+                        },
+                        {
+                            title: "Developer Training on Responsible AI Use",
+                            severity: "low",
+                            description: "Developers lack formal training on AI tool risks, secure prompting, and critical review of AI-generated code — leading to inconsistent security practices across teams.",
+                            controls: [
+                                "Develop secure AI coding training program",
+                                "Create AI code review checklist",
+                                "Establish AI Champions program within engineering"
+                            ],
+                            frameworks: ["NIST AI RMF MG-4", "NIST SSDF PO.2"]
+                        }
+                    ]
+                }
+            },
+            {
+                id: "chatbot",
+                icon: "🤝",
+                title: "Customer-Facing AI Chatbot",
+                description: "LLM-powered chatbot handling customer inquiries about products and services",
+                overallRisk: "high",
+                stats: { critical: 1, high: 3, medium: 3, low: 1 },
+                risks: {
+                    govern: [
+                        {
+                            title: "Liability for AI-Generated Advice",
+                            severity: "high",
+                            description: "If the chatbot provides incorrect product information, pricing, or contractual commitments, the organization may be legally bound by those AI-generated statements — as demonstrated in the Air Canada chatbot ruling.",
+                            controls: [
+                                "Define legal scope of chatbot authority (what it can/cannot commit to)",
+                                "Implement disclaimers for AI-generated responses",
+                                "Legal review of chatbot output boundaries and escalation rules",
+                                "Monitor for unauthorized commitments or pricing errors"
+                            ],
+                            frameworks: ["NIST AI RMF GV-1", "FTC Act §5", "Consumer Protection Laws"]
+                        },
+                        {
+                            title: "AI Transparency Policy",
+                            severity: "medium",
+                            description: "Customers may not know they're interacting with AI. Emerging regulations require clear disclosure, and customer trust depends on honest communication about AI involvement.",
+                            controls: [
+                                "Clearly disclose AI nature at start of every conversation",
+                                "Provide option to escalate to human agent at any point",
+                                "Document transparency approach in AI governance policy"
+                            ],
+                            frameworks: ["EU AI Act Art. 52", "NIST AI RMF GV-4", "CCPA"]
+                        }
+                    ],
+                    map: [
+                        {
+                            title: "Customer Data Exposure",
+                            severity: "critical",
+                            description: "Chatbot conversations contain PII, account details, and potentially sensitive inquiries. This data flows through AI processing, creating risk of data leakage, unauthorized retention, or cross-contamination between customer conversations.",
+                            controls: [
+                                "Implement conversation data isolation between customers",
+                                "PII detection and redaction in conversation logs",
+                                "Define data retention policy for chatbot conversations",
+                                "Data processing agreement with AI provider",
+                                "Regular audit of conversation data handling"
+                            ],
+                            frameworks: ["GDPR Art. 5", "CCPA §1798.100", "SOC 2 CC6.1", "NIST AI RMF MP-2"]
+                        },
+                        {
+                            title: "Hallucination in Customer Interactions",
+                            severity: "high",
+                            description: "LLM chatbot may fabricate product features, invent policies, or provide incorrect troubleshooting steps. In customer-facing contexts, hallucination directly impacts trust and may create legal liability.",
+                            controls: [
+                                "Ground chatbot responses in approved knowledge base only",
+                                "Implement retrieval-augmented generation (RAG) architecture",
+                                "Continuous monitoring of response accuracy",
+                                "Automatic escalation when confidence is below threshold"
+                            ],
+                            frameworks: ["NIST AI RMF MP-3", "NIST AI RMF MP-4"]
+                        },
+                        {
+                            title: "Prompt Injection Attacks",
+                            severity: "high",
+                            description: "Malicious users may craft inputs designed to manipulate the chatbot into revealing system prompts, bypassing safety filters, or performing unintended actions — a well-documented attack vector for LLM applications.",
+                            controls: [
+                                "Implement input sanitization and prompt injection detection",
+                                "Use system prompt hardening techniques",
+                                "Regular red team testing for prompt injection vulnerabilities",
+                                "Monitor for anomalous conversation patterns"
+                            ],
+                            frameworks: ["OWASP LLM Top 10", "NIST AI RMF MP-5", "NIST CSF PR.PT"]
+                        },
+                        {
+                            title: "Accessibility and Language Bias",
+                            severity: "medium",
+                            description: "Chatbot may perform unevenly across languages, dialects, or accessibility needs — providing worse service to non-native speakers or users with atypical communication patterns.",
+                            controls: [
+                                "Test chatbot performance across supported languages",
+                                "Evaluate response quality for diverse communication styles",
+                                "Ensure WCAG compliance for chatbot interface"
+                            ],
+                            frameworks: ["NIST AI RMF MP-3", "ADA", "WCAG 2.1"]
+                        }
+                    ],
+                    measure: [
+                        {
+                            title: "Response Accuracy Monitoring",
+                            severity: "medium",
+                            description: "No systematic measurement of chatbot response accuracy, relevance, or customer satisfaction — making it impossible to detect degradation or quantify the AI's impact on customer experience.",
+                            controls: [
+                                "Implement response accuracy scoring via human review sampling",
+                                "Track customer satisfaction scores for AI vs human interactions",
+                                "Monitor escalation rates as proxy for AI failure",
+                                "Dashboard for real-time chatbot health metrics"
+                            ],
+                            frameworks: ["NIST AI RMF MS-1", "NIST AI RMF MS-2"]
+                        },
+                        {
+                            title: "Conversation Safety Monitoring",
+                            severity: "medium",
+                            description: "No monitoring for harmful, inappropriate, or off-brand responses being generated by the chatbot — a single viral screenshot of a bad interaction can cause significant reputational damage.",
+                            controls: [
+                                "Implement toxic content detection on chatbot outputs",
+                                "Real-time alerting on flagged conversations",
+                                "Conversation review program with random sampling"
+                            ],
+                            frameworks: ["NIST AI RMF MS-3", "NIST AI RMF MS-4"]
+                        }
+                    ],
+                    manage: [
+                        {
+                            title: "Chatbot Kill Switch and Fallback",
+                            severity: "high",
+                            description: "No defined process to rapidly disable the AI chatbot if it begins generating harmful, incorrect, or brand-damaging responses at scale.",
+                            controls: [
+                                "Implement one-click kill switch to disable AI and route to human agents",
+                                "Define automated triggers for chatbot shutdown (error rate spike, toxicity detection)",
+                                "Pre-built customer communication for AI downtime",
+                                "Regular kill switch testing as part of incident response drills"
+                            ],
+                            frameworks: ["NIST AI RMF MG-2", "NIST AI RMF MG-3"]
+                        },
+                        {
+                            title: "Customer Feedback Loop",
+                            severity: "low",
+                            description: "No structured mechanism for customers to flag incorrect or unhelpful AI responses — missing valuable signal for continuous improvement.",
+                            controls: [
+                                "Add thumbs up/down feedback mechanism to chatbot responses",
+                                "Route negative feedback to human review queue",
+                                "Monthly analysis of feedback trends to improve knowledge base"
+                            ],
+                            frameworks: ["NIST AI RMF MG-4"]
+                        }
+                    ]
+                }
+            }
+        ];
+
+        // ============================================
+        // ADDITIONAL USE CASES (BATCH 2)
+        // ============================================
+        useCases.push(
+            {
+                id: "healthcare-diagnostics",
+                icon: "🏥",
+                title: "AI-Powered Medical Diagnostics",
+                description: "ML models analyzing medical images or patient data to assist clinical diagnosis",
+                overallRisk: "critical",
+                stats: { critical: 3, high: 2, medium: 2, low: 1 },
+                risks: {
+                    govern: [
+                        {
+                            title: "Regulatory Classification as Medical Device",
+                            severity: "critical",
+                            description: "AI diagnostic tools may be classified as medical devices by the FDA (SaMD — Software as a Medical Device), requiring 510(k) clearance or De Novo classification before deployment. Operating without clearance exposes the organization to severe regulatory action.",
+                            controls: [
+                                "Engage FDA regulatory counsel before development begins",
+                                "Determine device classification and submission pathway",
+                                "Implement Quality Management System (QMS) per 21 CFR Part 820",
+                                "Document intended use statements to clarify regulatory scope"
+                            ],
+                            frameworks: ["FDA SaMD Guidance", "21 CFR Part 820", "EU MDR", "NIST AI RMF GV-1"]
+                        },
+                        {
+                            title: "Clinical Liability and Malpractice Exposure",
+                            severity: "critical",
+                            description: "If an AI diagnostic tool provides an incorrect result leading to patient harm, liability may fall on the software provider, the healthcare organization, or the clinician. Legal frameworks for AI-assisted clinical decisions remain unclear.",
+                            controls: [
+                                "Define AI as decision-support only — clinician makes final diagnosis",
+                                "Obtain clinical validation studies before deployment",
+                                "Maintain professional liability insurance covering AI-assisted diagnosis",
+                                "Document that AI output is supplementary, not determinative"
+                            ],
+                            frameworks: ["NIST AI RMF GV-1", "FDA SaMD Guidance", "AMA AI Policy"]
+                        }
+                    ],
+                    map: [
+                        {
+                            title: "Patient Data Privacy (HIPAA)",
+                            severity: "critical",
+                            description: "Medical images and patient data are Protected Health Information (PHI). Processing through AI systems — especially cloud-based — creates HIPAA compliance exposure including breach notification obligations.",
+                            controls: [
+                                "Ensure BAA (Business Associate Agreement) with AI service provider",
+                                "Implement de-identification per HIPAA Safe Harbor before AI processing",
+                                "Data encryption at rest and in transit for all PHI",
+                                "Access controls limiting AI system access to minimum necessary PHI",
+                                "Audit logging of all AI access to patient data"
+                            ],
+                            frameworks: ["HIPAA Privacy Rule", "HIPAA Security Rule", "HITECH Act", "NIST AI RMF MP-2"]
+                        },
+                        {
+                            title: "Demographic Bias in Diagnostic Accuracy",
+                            severity: "high",
+                            description: "Medical AI models often underperform on underrepresented populations — particularly people of color, women, and elderly patients — due to training data that overrepresents specific demographics. This creates life-threatening diagnostic disparities.",
+                            controls: [
+                                "Validate model performance across demographic subgroups",
+                                "Ensure training data includes representative demographic distribution",
+                                "Publish demographic performance data in clinical validation reports",
+                                "Implement ongoing monitoring for disparate diagnostic accuracy"
+                            ],
+                            frameworks: ["NIST AI RMF MP-3", "FDA Guidance on AI Bias", "EU AI Act Art. 10"]
+                        }
+                    ],
+                    measure: [
+                        {
+                            title: "Clinical Validation and Accuracy Standards",
+                            severity: "high",
+                            description: "Without rigorous clinical validation against established diagnostic gold standards, the AI system's accuracy, sensitivity, and specificity are unknown — creating patient safety risk.",
+                            controls: [
+                                "Conduct prospective clinical study with published results",
+                                "Define minimum sensitivity/specificity thresholds by condition",
+                                "Compare AI performance against board-certified specialist baseline",
+                                "Continuous post-market surveillance for accuracy degradation"
+                            ],
+                            frameworks: ["NIST AI RMF MS-1", "FDA Real-World Performance", "NIST AI RMF MS-2"]
+                        },
+                        {
+                            title: "Model Drift in Clinical Context",
+                            severity: "medium",
+                            description: "Medical imaging equipment upgrades, protocol changes, or shifts in patient population can cause model performance to degrade without visible indicators — potentially leading to missed diagnoses.",
+                            controls: [
+                                "Implement continuous monitoring tied to clinical outcome data",
+                                "Re-validate model after any imaging equipment or protocol change",
+                                "Establish automated alerts for performance metric degradation"
+                            ],
+                            frameworks: ["NIST AI RMF MS-4", "FDA Post-Market Surveillance"]
+                        }
+                    ],
+                    manage: [
+                        {
+                            title: "Clinical Override and Escalation Protocol",
+                            severity: "medium",
+                            description: "Clinicians need clear guidance on when and how to override AI recommendations, and the system must support easy override without friction that could delay patient care.",
+                            controls: [
+                                "Display AI confidence level alongside every recommendation",
+                                "One-click override with mandatory reason documentation",
+                                "Route low-confidence results directly to specialist review",
+                                "Track override patterns for model improvement feedback loop"
+                            ],
+                            frameworks: ["NIST AI RMF MG-2", "NIST AI RMF MG-4"]
+                        },
+                        {
+                            title: "Patient Communication and Consent",
+                            severity: "low",
+                            description: "Patients may not be informed that AI is assisting in their diagnosis. Emerging standards require disclosure and informed consent for AI-assisted medical decisions.",
+                            controls: [
+                                "Include AI disclosure in patient consent forms",
+                                "Provide patient-facing explanation of AI's role in diagnosis",
+                                "Offer option for human-only diagnostic pathway"
+                            ],
+                            frameworks: ["NIST AI RMF MG-4", "AMA Code of Ethics"]
+                        }
+                    ]
+                }
+            },
+            {
+                id: "credit-scoring",
+                icon: "💳",
+                title: "AI Credit Scoring & Lending",
+                description: "ML models evaluating creditworthiness and automating lending decisions",
+                overallRisk: "critical",
+                stats: { critical: 2, high: 3, medium: 2, low: 1 },
+                risks: {
+                    govern: [
+                        {
+                            title: "Fair Lending Regulatory Compliance",
+                            severity: "critical",
+                            description: "AI lending models are subject to the Equal Credit Opportunity Act (ECOA), Fair Housing Act, and CFPB oversight. Discriminatory outcomes — even unintentional — carry severe regulatory penalties, litigation risk, and reputational damage.",
+                            controls: [
+                                "Conduct adverse action analysis before and after deployment",
+                                "Engage fair lending counsel for model review",
+                                "Implement fair lending testing program with regular audits",
+                                "Document model governance in compliance management system"
+                            ],
+                            frameworks: ["ECOA", "Fair Housing Act", "CFPB Guidance", "NIST AI RMF GV-1"]
+                        },
+                        {
+                            title: "Adverse Action Notice Requirements",
+                            severity: "high",
+                            description: "Federal law requires specific reasons when credit is denied. AI models using hundreds of features make it difficult to generate the required clear, specific adverse action reasons — creating compliance gaps.",
+                            controls: [
+                                "Implement explainable AI methods to generate reason codes",
+                                "Map model features to regulatory-compliant adverse action categories",
+                                "Legal review of AI-generated adverse action notices",
+                                "Test consumer comprehension of AI-generated explanations"
+                            ],
+                            frameworks: ["ECOA Reg B", "FCRA", "CFPB Adverse Action Guidance", "NIST AI RMF GV-4"]
+                        }
+                    ],
+                    map: [
+                        {
+                            title: "Proxy Discrimination in Alternative Data",
+                            severity: "critical",
+                            description: "AI models using alternative data (social media, phone usage, browsing history) may inadvertently use features that are proxies for race, gender, or national origin — violating fair lending laws even without explicit protected class inputs.",
+                            controls: [
+                                "Conduct proxy analysis on all model features",
+                                "Remove or constrain features with high correlation to protected classes",
+                                "Test model with synthetic data varying only demographic signals",
+                                "Independent third-party fair lending audit"
+                            ],
+                            frameworks: ["ECOA", "NIST AI RMF MP-3", "CFPB Fair Lending", "NIST AI RMF MP-4"]
+                        },
+                        {
+                            title: "Consumer Data Privacy",
+                            severity: "high",
+                            description: "Credit scoring models may ingest sensitive financial data, behavioral data, and alternative data sources — creating privacy obligations under multiple overlapping regulations.",
+                            controls: [
+                                "Data minimization — use only data necessary for creditworthiness assessment",
+                                "Consumer disclosure of all data sources used in scoring",
+                                "Compliance with FCRA permissible purpose requirements",
+                                "Data retention policy aligned with regulatory requirements"
+                            ],
+                            frameworks: ["FCRA", "CCPA", "GLBA", "NIST AI RMF MP-2"]
+                        },
+                        {
+                            title: "Model Opacity and Explainability",
+                            severity: "high",
+                            description: "Complex ensemble models or deep learning approaches may be unable to provide the level of explainability required by regulators — particularly for individual credit decisions.",
+                            controls: [
+                                "Use interpretable models or implement post-hoc explanation methods",
+                                "Generate individual-level explanations for every credit decision",
+                                "Maintain model documentation meeting SR 11-7 requirements",
+                                "Benchmark explanation quality against regulatory expectations"
+                            ],
+                            frameworks: ["FFIEC Model Risk Mgmt (SR 11-7)", "NIST AI RMF MP-5", "EU AI Act Art. 13"]
+                        }
+                    ],
+                    measure: [
+                        {
+                            title: "Disparate Impact Testing",
+                            severity: "high",
+                            description: "Without continuous disparate impact analysis, the model may systematically disadvantage protected groups — creating legal liability that compounds over time as more consumers are affected.",
+                            controls: [
+                                "Implement automated disparate impact monitoring in production",
+                                "Apply the 4/5ths rule and statistical significance tests",
+                                "Quarterly fair lending analysis with results reported to board",
+                                "Corrective action triggers when disparate impact detected"
+                            ],
+                            frameworks: ["ECOA 4/5ths Rule", "NIST AI RMF MS-2", "NIST AI RMF MS-3"]
+                        },
+                        {
+                            title: "Model Performance Monitoring",
+                            severity: "medium",
+                            description: "Economic conditions, consumer behavior, and population shifts can cause credit model performance to degrade — leading to either excessive risk-taking or unnecessary credit denial.",
+                            controls: [
+                                "Monitor approval rates, default rates, and profitability by segment",
+                                "Implement champion-challenger framework for model comparison",
+                                "Scheduled model revalidation per regulatory expectations"
+                            ],
+                            frameworks: ["NIST AI RMF MS-1", "FFIEC Model Risk Mgmt"]
+                        }
+                    ],
+                    manage: [
+                        {
+                            title: "Consumer Appeal and Override Process",
+                            severity: "medium",
+                            description: "Consumers denied credit by AI have limited ability to understand or contest the decision. Regulatory requirements mandate clear appeal processes, but AI complexity makes meaningful appeals difficult.",
+                            controls: [
+                                "Implement human review process for consumer appeals",
+                                "Provide clear, actionable explanation with every denial",
+                                "Track appeal outcomes and feed into model improvement",
+                                "Ensure override authority for human reviewers"
+                            ],
+                            frameworks: ["ECOA", "FCRA §611", "NIST AI RMF MG-2"]
+                        },
+                        {
+                            title: "Third-Party Model Vendor Governance",
+                            severity: "low",
+                            description: "Organizations using third-party AI credit scoring vendors remain responsible for regulatory compliance — but often lack visibility into vendor model internals and updates.",
+                            controls: [
+                                "Include AI model governance requirements in vendor contracts",
+                                "Require vendor to provide model validation documentation",
+                                "Independent validation of vendor model per SR 11-7",
+                                "Notification requirement for any vendor model updates"
+                            ],
+                            frameworks: ["NIST AI RMF MG-3", "FFIEC Third-Party Risk"]
+                        }
+                    ]
+                }
+            },
+            {
+                id: "employee-monitoring",
+                icon: "👁️",
+                title: "AI Employee Productivity Monitoring",
+                description: "AI-powered tools tracking employee behavior, keystrokes, and productivity scores",
+                overallRisk: "high",
+                stats: { critical: 1, high: 3, medium: 3, low: 1 },
+                risks: {
+                    govern: [
+                        {
+                            title: "Employee Privacy and Trust Erosion",
+                            severity: "critical",
+                            description: "AI monitoring of employee behavior — keystrokes, screen activity, communication sentiment, location — creates severe privacy concerns and can fundamentally damage organizational trust and culture.",
+                            controls: [
+                                "Define clear, transparent monitoring policy communicated to all employees",
+                                "Limit monitoring scope to work-related activities only",
+                                "Obtain explicit employee consent where legally required",
+                                "Conduct Privacy Impact Assessment before deployment",
+                                "Establish employee feedback channel for monitoring concerns"
+                            ],
+                            frameworks: ["GDPR Art. 6 & Art. 9", "ECPA", "State Privacy Laws", "NIST AI RMF GV-1"]
+                        },
+                        {
+                            title: "Legal Compliance Across Jurisdictions",
+                            severity: "high",
+                            description: "Employee monitoring laws vary dramatically by jurisdiction — EU GDPR strictly limits surveillance, while US state laws have varying consent requirements. Multi-state or multinational employers face a patchwork of conflicting obligations.",
+                            controls: [
+                                "Legal review of monitoring practices per jurisdiction",
+                                "Maintain jurisdiction-specific monitoring configurations",
+                                "Monitor legislative changes in employee surveillance law",
+                                "Works council / union consultation where required (EU)"
+                            ],
+                            frameworks: ["GDPR Art. 88", "CCPA Employee Provisions", "ECPA", "NIST AI RMF GV-2"]
+                        }
+                    ],
+                    map: [
+                        {
+                            title: "Bias in Productivity Scoring",
+                            severity: "high",
+                            description: "AI productivity scores may systematically disadvantage employees with disabilities, caregiving responsibilities, neurodiverse work patterns, or different communication styles — creating discrimination and ADA/EEOC exposure.",
+                            controls: [
+                                "Audit productivity scores for demographic disparities",
+                                "Ensure scoring metrics accommodate diverse work styles",
+                                "ADA reasonable accommodation review for monitoring tools",
+                                "Prohibit use of raw productivity scores in personnel decisions"
+                            ],
+                            frameworks: ["ADA", "EEOC Guidance", "NIST AI RMF MP-3", "EU AI Act Art. 6"]
+                        },
+                        {
+                            title: "Sensitive Data Collection Scope Creep",
+                            severity: "high",
+                            description: "Monitoring tools may capture personal communications, health information, political activity, or union organizing — data categories that trigger enhanced legal protections and can create hostile work environment claims.",
+                            controls: [
+                                "Implement technical controls to exclude personal communications",
+                                "Block capture of health, political, and union-related activity",
+                                "Regular audit of data types actually being collected",
+                                "Data minimization — collect only what's necessary and justifiable"
+                            ],
+                            frameworks: ["NLRA §7", "HIPAA", "GDPR Art. 9", "NIST AI RMF MP-2"]
+                        },
+                        {
+                            title: "Psychological Safety Impact",
+                            severity: "medium",
+                            description: "Pervasive monitoring can create anxiety, reduce creativity, and increase turnover — paradoxically reducing the productivity it aims to measure. Research shows surveillance-driven cultures underperform trust-based cultures.",
+                            controls: [
+                                "Measure employee sentiment and engagement alongside productivity",
+                                "Use aggregate team metrics rather than individual surveillance",
+                                "Implement anonymization for individual-level data where possible",
+                                "Regular review of monitoring impact on retention and satisfaction"
+                            ],
+                            frameworks: ["NIST AI RMF MP-4", "ISO 45003 (Psychological Safety)"]
+                        }
+                    ],
+                    measure: [
+                        {
+                            title: "Validity of Productivity Metrics",
+                            severity: "medium",
+                            description: "AI productivity scores often measure activity (keystrokes, mouse movements, screen time) rather than actual output quality — creating perverse incentives and inaccurate performance assessments.",
+                            controls: [
+                                "Validate that monitored metrics correlate with actual job performance",
+                                "Include output quality measures alongside activity metrics",
+                                "A/B test whether monitoring improves or degrades actual outcomes",
+                                "Regular review of metric relevance by role and function"
+                            ],
+                            frameworks: ["NIST AI RMF MS-1", "NIST AI RMF MS-2"]
+                        },
+                        {
+                            title: "Fairness Across Roles and Functions",
+                            severity: "medium",
+                            description: "A single productivity model applied across diverse roles (engineering, design, management, support) produces meaningless comparisons — disadvantaging roles that involve collaboration, thinking, or non-digital work.",
+                            controls: [
+                                "Develop role-specific metrics rather than universal scoring",
+                                "Validate scoring fairness across job functions",
+                                "Exclude non-comparable roles from unified scoring"
+                            ],
+                            frameworks: ["NIST AI RMF MS-3"]
+                        }
+                    ],
+                    manage: [
+                        {
+                            title: "Employee Recourse and Dispute Resolution",
+                            severity: "medium",
+                            description: "Employees flagged as 'low productivity' by AI have no transparency into scoring methodology and no formal mechanism to dispute or explain their scores.",
+                            controls: [
+                                "Provide employees visibility into their own monitoring data",
+                                "Implement formal dispute process for productivity assessments",
+                                "Prohibit automated personnel decisions based solely on AI scores",
+                                "Require human review before any adverse action based on monitoring"
+                            ],
+                            frameworks: ["GDPR Art. 22", "NIST AI RMF MG-2", "EU AI Act Art. 14"]
+                        },
+                        {
+                            title: "Data Breach Impact Amplification",
+                            severity: "low",
+                            description: "A breach of employee monitoring data is far more damaging than a typical HR data breach — detailed behavioral data, communication patterns, and productivity scores create significant harm potential.",
+                            controls: [
+                                "Enhanced security controls for monitoring data (encryption, access controls)",
+                                "Minimize data retention to shortest justifiable period",
+                                "Include monitoring data in incident response and breach notification plans",
+                                "Separate monitoring data from general HR systems"
+                            ],
+                            frameworks: ["NIST AI RMF MG-3", "NIST CSF PR.DS"]
+                        }
+                    ]
+                }
+            },
+            {
+                id: "facial-recognition",
+                icon: "📸",
+                title: "Facial Recognition Access Control",
+                description: "Biometric AI systems for building access, identity verification, and surveillance",
+                overallRisk: "critical",
+                stats: { critical: 2, high: 3, medium: 2, low: 1 },
+                risks: {
+                    govern: [
+                        {
+                            title: "Biometric Data Regulation (BIPA & State Laws)",
+                            severity: "critical",
+                            description: "Illinois BIPA, Washington state law, and growing state-level biometric privacy legislation impose strict requirements — written consent, data retention limits, and private right of action. BIPA violations include statutory damages of $1,000-$5,000 per incident.",
+                            controls: [
+                                "Obtain informed written consent before biometric data collection",
+                                "Publish biometric data retention and destruction policy",
+                                "Legal review of biometric laws in all operating jurisdictions",
+                                "Implement data retention limits and automated destruction",
+                                "Maintain audit trail of consent and data lifecycle"
+                            ],
+                            frameworks: ["BIPA", "CCPA Biometric Provisions", "GDPR Art. 9", "NIST AI RMF GV-1"]
+                        },
+                        {
+                            title: "Proportionality and Necessity Assessment",
+                            severity: "high",
+                            description: "Facial recognition for building access may be disproportionate to the security need — simpler alternatives (badge, PIN, fingerprint) may achieve the same goal with less privacy impact. GDPR requires demonstrating necessity.",
+                            controls: [
+                                "Conduct proportionality assessment: is biometric data necessary?",
+                                "Evaluate less-invasive alternatives (badges, PINs)",
+                                "Document legitimate interest and necessity justification",
+                                "Provide opt-out alternative for employees who decline biometric enrollment"
+                            ],
+                            frameworks: ["GDPR Art. 5(1)(c)", "EU AI Act Art. 6", "NIST AI RMF GV-4"]
+                        }
+                    ],
+                    map: [
+                        {
+                            title: "Demographic Accuracy Disparities",
+                            severity: "critical",
+                            description: "Facial recognition systems demonstrate well-documented accuracy disparities — error rates up to 100x higher for darker-skinned women compared to lighter-skinned men (NIST FRVT). This creates discriminatory access denial and false identification.",
+                            controls: [
+                                "Require vendor to provide demographic performance data (NIST FRVT results)",
+                                "Test system accuracy across demographic groups before deployment",
+                                "Implement fallback identification method for false rejections",
+                                "Continuous monitoring of error rates by demographic segment"
+                            ],
+                            frameworks: ["NIST FRVT", "NIST AI RMF MP-3", "Title VII", "EU AI Act Art. 10"]
+                        },
+                        {
+                            title: "Biometric Data Breach Impact",
+                            severity: "high",
+                            description: "Unlike passwords, biometric data cannot be changed. A breach of facial recognition templates creates permanent, irremediable exposure — affected individuals can never 'reset' their face.",
+                            controls: [
+                                "Store biometric templates encrypted with hardware security modules",
+                                "Never store raw biometric images — use irreversible templates only",
+                                "Network segmentation isolating biometric systems",
+                                "Enhanced incident response plan for biometric data breaches"
+                            ],
+                            frameworks: ["NIST AI RMF MP-2", "BIPA", "NIST CSF PR.DS", "SOC 2 CC6.1"]
+                        },
+                        {
+                            title: "Function Creep and Surveillance Expansion",
+                            severity: "high",
+                            description: "Systems deployed for access control may gradually expand to employee tracking, behavior analysis, emotion detection, or performance monitoring — exceeding the original purpose and consent scope.",
+                            controls: [
+                                "Define and enforce strict purpose limitation in policy",
+                                "Technical controls preventing use beyond stated purpose",
+                                "Annual review of system usage against original purpose statement",
+                                "Require new consent and assessment for any scope expansion"
+                            ],
+                            frameworks: ["GDPR Art. 5(1)(b)", "NIST AI RMF MP-4", "BIPA"]
+                        }
+                    ],
+                    measure: [
+                        {
+                            title: "False Acceptance and Rejection Rates",
+                            severity: "medium",
+                            description: "Unmonitored false acceptance rates (unauthorized access) and false rejection rates (legitimate users denied) create both security and usability risks. The threshold balance between security and convenience needs continuous tuning.",
+                            controls: [
+                                "Monitor FAR (False Acceptance Rate) and FRR (False Rejection Rate) continuously",
+                                "Define acceptable thresholds for both metrics",
+                                "Track rates by demographic group to detect disparities",
+                                "Regular threshold review based on operational data"
+                            ],
+                            frameworks: ["NIST AI RMF MS-1", "NIST FRVT", "NIST AI RMF MS-2"]
+                        },
+                        {
+                            title: "Adversarial Attack Vulnerability",
+                            severity: "medium",
+                            description: "Facial recognition systems are vulnerable to presentation attacks (photos, masks, deepfakes) that can fool the system into granting unauthorized access.",
+                            controls: [
+                                "Implement liveness detection (anti-spoofing) technology",
+                                "Red team testing for presentation attacks",
+                                "Multi-factor authentication combining biometrics with another factor",
+                                "Monitor for unusual authentication patterns"
+                            ],
+                            frameworks: ["NIST AI RMF MS-4", "ISO 30107 (Presentation Attack Detection)"]
+                        }
+                    ],
+                    manage: [
+                        {
+                            title: "Individual Rights and Opt-Out",
+                            severity: "high",
+                            description: "Individuals may have legal right to refuse biometric enrollment (GDPR, BIPA), request deletion of biometric data, or access their stored biometric information. Systems must support these rights operationally.",
+                            controls: [
+                                "Implement biometric data deletion process honoring individual requests",
+                                "Provide non-biometric alternative access method",
+                                "Track and respond to biometric data access requests within legal timeframes",
+                                "Automated biometric template destruction at end of retention period"
+                            ],
+                            frameworks: ["GDPR Art. 17", "BIPA", "CCPA", "NIST AI RMF MG-2"]
+                        },
+                        {
+                            title: "Vendor Lock-in and Template Portability",
+                            severity: "low",
+                            description: "Proprietary biometric templates from one vendor may not be compatible with alternative systems — creating vendor dependency and complicating data deletion or system migration.",
+                            controls: [
+                                "Evaluate template format portability during vendor selection",
+                                "Include data export and deletion clauses in vendor contract",
+                                "Plan for template re-enrollment if vendor change is needed"
+                            ],
+                            frameworks: ["NIST AI RMF MG-3"]
+                        }
+                    ]
+                }
+            },
+            {
+                id: "legal-analysis",
+                icon: "⚖️",
+                title: "AI Legal Document Analysis",
+                description: "LLMs reviewing contracts, regulatory filings, and legal documents for risk identification",
+                overallRisk: "high",
+                stats: { critical: 1, high: 2, medium: 4, low: 1 },
+                risks: {
+                    govern: [
+                        {
+                            title: "Unauthorized Practice of Law Risk",
+                            severity: "critical",
+                            description: "AI providing legal interpretations, recommendations, or risk assessments may constitute unauthorized practice of law if not supervised by a licensed attorney — exposing the organization and the AI provider to regulatory action.",
+                            controls: [
+                                "Position AI as attorney work product tool, not independent legal advisor",
+                                "Require licensed attorney review of all AI legal analysis",
+                                "Include disclaimers that AI output does not constitute legal advice",
+                                "Restrict AI legal tools to licensed legal professionals only"
+                            ],
+                            frameworks: ["ABA Model Rules", "UPL Statutes", "NIST AI RMF GV-1"]
+                        },
+                        {
+                            title: "Attorney-Client Privilege Protection",
+                            severity: "high",
+                            description: "Sending privileged communications or work product to third-party AI services may waive attorney-client privilege — the most critical protection in legal practice. Once waived, privilege may be irrecoverable.",
+                            controls: [
+                                "Use enterprise AI agreements with privilege protection clauses",
+                                "Implement data classification to identify privileged material",
+                                "Legal department policy on AI usage with privileged documents",
+                                "Consider self-hosted AI solutions for privilege-sensitive work"
+                            ],
+                            frameworks: ["ABA Formal Opinion 477R", "NIST AI RMF GV-4", "Model Rules 1.6"]
+                        }
+                    ],
+                    map: [
+                        {
+                            title: "Hallucination in Legal Analysis",
+                            severity: "high",
+                            description: "LLMs may fabricate case citations, misquote statutes, invent legal precedents, or misinterpret contract clauses — as demonstrated in the widely publicized Mata v. Avianca case where AI-generated fake case citations were submitted to federal court.",
+                            controls: [
+                                "Mandatory verification of all AI-cited cases and statutes",
+                                "Implement citation verification tools in workflow",
+                                "Training for legal staff on LLM hallucination patterns",
+                                "Never submit AI output to courts without independent verification"
+                            ],
+                            frameworks: ["NIST AI RMF MP-3", "NIST AI RMF MP-4"]
+                        },
+                        {
+                            title: "Confidential Data Exposure",
+                            severity: "medium",
+                            description: "Legal documents contain highly confidential information — M&A details, litigation strategy, trade secrets, settlement terms. Sending this to cloud AI services creates data leakage risk.",
+                            controls: [
+                                "Use enterprise AI with data isolation guarantees",
+                                "Implement DLP controls on legal document AI workflows",
+                                "Classify legal documents by confidentiality level before AI processing",
+                                "Data processing agreement with AI provider covering legal data"
+                            ],
+                            frameworks: ["NIST AI RMF MP-2", "SOC 2 CC6.1", "Model Rules 1.6"]
+                        },
+                        {
+                            title: "Jurisdictional Accuracy Limitations",
+                            severity: "medium",
+                            description: "AI models trained primarily on US federal law may provide inaccurate analysis for state-specific, international, or emerging legal areas — with errors potentially invisible to non-specialist reviewers.",
+                            controls: [
+                                "Document jurisdictional limitations of AI legal tools",
+                                "Require jurisdiction-specific expertise for AI output review",
+                                "Test AI accuracy across relevant jurisdictions before deployment"
+                            ],
+                            frameworks: ["NIST AI RMF MP-5"]
+                        }
+                    ],
+                    measure: [
+                        {
+                            title: "Accuracy Benchmarking",
+                            severity: "medium",
+                            description: "Without benchmarking AI legal analysis against attorney work product, the organization cannot quantify whether AI improves or degrades legal analysis quality — creating unknown risk exposure.",
+                            controls: [
+                                "Benchmark AI output against attorney analysis on sample set",
+                                "Track error rate by document type and legal domain",
+                                "Measure time savings vs accuracy tradeoff",
+                                "Regular quality review of AI-assisted legal work product"
+                            ],
+                            frameworks: ["NIST AI RMF MS-1", "NIST AI RMF MS-2"]
+                        },
+                        {
+                            title: "Scope and Completeness Monitoring",
+                            severity: "medium",
+                            description: "AI may identify some contract risks while missing others — creating false confidence that a thorough review has been completed when material risks remain undetected.",
+                            controls: [
+                                "Define standard risk checklist to validate AI completeness",
+                                "Track missed risk rate through post-review human audit",
+                                "Implement confidence scoring for AI risk identification"
+                            ],
+                            frameworks: ["NIST AI RMF MS-3", "NIST AI RMF MS-4"]
+                        }
+                    ],
+                    manage: [
+                        {
+                            title: "Professional Responsibility Training",
+                            severity: "medium",
+                            description: "Legal professionals using AI tools need specific training on ethical obligations — including duty of competence (understanding AI limitations) and duty of supervision (reviewing AI output).",
+                            controls: [
+                                "Mandatory AI competency training for all legal staff",
+                                "Include AI usage in professional responsibility CLE programs",
+                                "Document AI training and attestation for compliance records"
+                            ],
+                            frameworks: ["ABA Model Rule 1.1", "NIST AI RMF MG-4"]
+                        },
+                        {
+                            title: "Version Control and Audit Trail",
+                            severity: "low",
+                            description: "Legal proceedings may require demonstrating the provenance of legal analysis — was it AI-generated, human-reviewed, or a combination? Without audit trails, the organization cannot prove appropriate oversight.",
+                            controls: [
+                                "Implement audit logging for all AI-assisted legal work",
+                                "Track AI contribution vs human contribution in work product",
+                                "Maintain version history showing human review and modifications"
+                            ],
+                            frameworks: ["NIST AI RMF MG-2", "ABA Model Rules"]
+                        }
+                    ]
+                }
+            },
+            {
+                id: "autonomous-agents",
+                icon: "🧠",
+                title: "Autonomous AI Agents",
+                description: "AI agents that independently execute multi-step tasks — browsing, coding, purchasing, communicating",
+                overallRisk: "critical",
+                stats: { critical: 3, high: 3, medium: 1, low: 1 },
+                risks: {
+                    govern: [
+                        {
+                            title: "Unbounded Authority and Action Scope",
+                            severity: "critical",
+                            description: "Autonomous agents can take actions with real-world consequences — making purchases, sending communications, modifying systems, accessing data — without human approval for each action. The scope of potential harm scales with the agent's granted permissions.",
+                            controls: [
+                                "Define strict action boundaries and permission scopes per agent",
+                                "Implement financial limits and approval thresholds for autonomous actions",
+                                "Require human-in-the-loop for irreversible actions",
+                                "Maintain comprehensive action audit log",
+                                "Implement kill switch for immediate agent termination"
+                            ],
+                            frameworks: ["NIST AI RMF GV-1", "NIST AI RMF GV-6", "EU AI Act Art. 14"]
+                        },
+                        {
+                            title: "Liability for Autonomous Decisions",
+                            severity: "critical",
+                            description: "When an AI agent makes a purchase, signs an agreement, or sends a communication on behalf of the organization — who is liable? Current legal frameworks do not clearly address AI agent authority, creating ambiguous contractual and tortious liability.",
+                            controls: [
+                                "Legal analysis of agent authority under contract and agency law",
+                                "Define which actions constitute organizational commitments",
+                                "Implement disclosure that counterparties are dealing with AI",
+                                "Insurance coverage review for AI-initiated transactions",
+                                "Restrict agent authority to non-binding actions where possible"
+                            ],
+                            frameworks: ["NIST AI RMF GV-1", "Restatement of Agency", "EU AI Act"]
+                        }
+                    ],
+                    map: [
+                        {
+                            title: "Prompt Injection and Goal Hijacking",
+                            severity: "critical",
+                            description: "Autonomous agents that browse the web, read emails, or process external content are highly vulnerable to indirect prompt injection — where malicious content in the environment manipulates the agent into taking unintended actions.",
+                            controls: [
+                                "Implement input sanitization for all external content",
+                                "Sandbox agent execution environment from production systems",
+                                "Monitor for anomalous action patterns and goal deviation",
+                                "Restrict agent access to trusted data sources only",
+                                "Red team testing for indirect prompt injection vulnerabilities"
+                            ],
+                            frameworks: ["OWASP LLM Top 10", "NIST AI RMF MP-5", "NIST CSF PR.PT"]
+                        },
+                        {
+                            title: "Data Access and Exfiltration",
+                            severity: "high",
+                            description: "Agents with broad system access may inadvertently exfiltrate sensitive data — by including it in external communications, logging it inappropriately, or sharing it with unauthorized services during multi-step task execution.",
+                            controls: [
+                                "Implement least-privilege access for agent credentials",
+                                "DLP controls on agent external communications",
+                                "Data classification awareness in agent prompts",
+                                "Monitor all agent data access and egress"
+                            ],
+                            frameworks: ["NIST AI RMF MP-2", "SOC 2 CC6.1", "NIST CSF PR.AC"]
+                        },
+                        {
+                            title: "Cascading Failure and Unintended Consequences",
+                            severity: "high",
+                            description: "Multi-step autonomous agents can create cascading failures — an error in step 1 compounds through steps 2-10, potentially causing significant damage before human detection. The complexity of multi-step reasoning makes failure modes unpredictable.",
+                            controls: [
+                                "Implement checkpoints requiring human approval at critical junctures",
+                                "Design reversibility into agent actions wherever possible",
+                                "Rate limiting on agent actions to prevent rapid cascade",
+                                "Anomaly detection on agent behavior patterns"
+                            ],
+                            frameworks: ["NIST AI RMF MP-3", "NIST AI RMF MP-4"]
+                        }
+                    ],
+                    measure: [
+                        {
+                            title: "Goal Alignment Verification",
+                            severity: "high",
+                            description: "Verifying that an autonomous agent is actually pursuing the intended goal — and not a misinterpreted or adversarially modified version of it — is one of the fundamental unsolved problems in AI safety.",
+                            controls: [
+                                "Define explicit, measurable success criteria for each agent task",
+                                "Implement trajectory monitoring to detect goal deviation",
+                                "Human review of completed agent actions against original intent",
+                                "Restrict agent to narrow, well-defined task scopes"
+                            ],
+                            frameworks: ["NIST AI RMF MS-1", "NIST AI RMF MS-2", "NIST AI RMF MS-4"]
+                        }
+                    ],
+                    manage: [
+                        {
+                            title: "Emergency Shutdown and Rollback",
+                            severity: "high",
+                            description: "If an autonomous agent begins taking harmful actions, the organization needs immediate ability to stop the agent and reverse its actions — but multi-step agents may have already made irreversible changes.",
+                            controls: [
+                                "Implement real-time kill switch accessible to authorized operators",
+                                "Design agent actions to be reversible where possible (draft, not send)",
+                                "Automated shutdown triggers based on anomaly detection",
+                                "Post-incident forensic capability to trace agent action chain",
+                                "Regular kill switch testing as part of incident response drills"
+                            ],
+                            frameworks: ["NIST AI RMF MG-2", "NIST AI RMF MG-3", "NIST CSF RS.RP"]
+                        },
+                        {
+                            title: "Transparency Obligations",
+                            severity: "low",
+                            description: "People and organizations interacting with autonomous agents may not know they are dealing with AI. Emerging regulations require disclosure, and deceptive non-disclosure may create legal and ethical liability.",
+                            controls: [
+                                "Disclose AI agent identity in all external communications",
+                                "Implement visible AI indicators in agent-generated content",
+                                "Policy on transparency requirements for automated interactions"
+                            ],
+                            frameworks: ["EU AI Act Art. 52", "FTC Act §5", "NIST AI RMF MG-4"]
+                        }
+                    ]
+                }
+            }
+        );
+
+        // ============================================
+        // RENDERING FUNCTIONS
+        // ============================================
+
+        function renderUseCases() {
+            const grid = document.getElementById('useCaseGrid');
+            grid.innerHTML = useCases.map(uc => `
+                <div class="use-case-card" onclick="selectUseCase('${uc.id}')" id="card-${uc.id}">
+                    <div class="use-case-icon">${uc.icon}</div>
+                    <h3>${uc.title}</h3>
+                    <p>${uc.description}</p>
+                </div>
+            `).join('');
+        }
+
+        function selectUseCase(id) {
+            const uc = useCases.find(u => u.id === id);
+            if (!uc) return;
+
+            // Hide selector, show assessment
+            document.getElementById('selector').style.display = 'none';
+            const assessment = document.getElementById('assessment');
+            assessment.className = 'assessment visible';
+
+            // Render assessment
+            assessment.innerHTML = `
+                <button class="back-btn" onclick="goBack()">← Back to Use Cases</button>
+
+                <div class="assessment-header">
+                    <div>
+                        <div class="assessment-title">${uc.icon} ${uc.title}</div>
+                    </div>
+                    <div class="overall-risk ${uc.overallRisk}">
+                        <span class="risk-dot ${uc.overallRisk}"></span>
+                        Overall Risk: ${uc.overallRisk.charAt(0).toUpperCase() + uc.overallRisk.slice(1)}
+                    </div>
+                </div>
+
+                <div class="stats-bar">
+                    <div class="stat-card">
+                        <div class="stat-number critical-num">${uc.stats.critical}</div>
+                        <div class="stat-label">Critical</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number high-num">${uc.stats.high}</div>
+                        <div class="stat-label">High</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number medium-num">${uc.stats.medium}</div>
+                        <div class="stat-label">Medium</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number low-num">${uc.stats.low}</div>
+                        <div class="stat-label">Low</div>
+                    </div>
+                </div>
+
+                <div class="nist-tabs">
+                    <div class="nist-tab active-govern" onclick="showPanel('govern', this)" id="tab-govern">
+                        🏛 GOVERN <span class="tab-count">${uc.risks.govern.length}</span>
+                    </div>
+                    <div class="nist-tab" onclick="showPanel('map', this)" id="tab-map">
+                        🗺 MAP <span class="tab-count">${uc.risks.map.length}</span>
+                    </div>
+                    <div class="nist-tab" onclick="showPanel('measure', this)" id="tab-measure">
+                        📏 MEASURE <span class="tab-count">${uc.risks.measure.length}</span>
+                    </div>
+                    <div class="nist-tab" onclick="showPanel('manage', this)" id="tab-manage">
+                        🔧 MANAGE <span class="tab-count">${uc.risks.manage.length}</span>
+                    </div>
+                </div>
+
+                ${renderPanels(uc.risks)}
+            `;
+
+            // Show first panel
+            showPanel('govern', document.getElementById('tab-govern'));
+        }
+
+        function renderPanels(risks) {
+            return ['govern', 'map', 'measure', 'manage'].map(fn => `
+                <div class="risk-panel" id="panel-${fn}">
+                    ${risks[fn].map(r => renderRiskCard(r)).join('')}
+                </div>
+            `).join('');
+        }
+
+        function renderRiskCard(risk) {
+            return `
+                <div class="risk-card">
+                    <div class="risk-card-header">
+                        <div class="risk-card-title">${risk.title}</div>
+                        <span class="severity-badge ${risk.severity}">${risk.severity}</span>
+                    </div>
+                    <div class="risk-description">${risk.description}</div>
+                    <div class="controls-section">
+                        <div class="controls-label">Recommended Controls</div>
+                        <ul class="controls-list">
+                            ${risk.controls.map(c => `<li>${c}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="framework-tags">
+                        ${risk.frameworks.map(f => `<span class="framework-tag">${f}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function showPanel(panelId, tabEl) {
+            // Hide all panels
+            document.querySelectorAll('.risk-panel').forEach(p => p.className = 'risk-panel');
+            // Show target
+            document.getElementById(`panel-${panelId}`).className = 'risk-panel visible';
+
+            // Update tabs
+            const functions = ['govern', 'map', 'measure', 'manage'];
+            document.querySelectorAll('.nist-tab').forEach(t => {
+                t.className = 'nist-tab';
+            });
+            tabEl.className = `nist-tab active-${panelId}`;
+        }
+
+        function goBack() {
+            document.getElementById('selector').style.display = 'block';
+            document.getElementById('assessment').className = 'assessment';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize
+        renderUseCases();
+
+        // ============================================
+        // MISSION CONTROL: Interactive Elements
+        // ============================================
+
+        // 1. Typewriter Effect for Header
+        function initTypewriter() {
+            const subtitle = document.querySelector('.header p');
+            const text = subtitle.textContent.replace(/\s+/g, ' ').trim();
+            subtitle.textContent = '';
+
+            let i = 0;
+            const speed = 20; // ms per char
+
+            function type() {
+                if (i < text.length) {
+                    subtitle.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else {
+                    subtitle.style.borderRight = 'none'; // Remove cursor at end
+                }
+            }
+
+            // Add cursor style
+            subtitle.style.borderRight = '2px solid var(--accent)';
+
+            // Start after a slight delay
+            setTimeout(type, 500);
+        }
+
+        // 2. 3D Tilt Effect for Cards
+        function initTiltEffect() {
+            const cards = document.querySelectorAll('.use-case-card');
+
+            cards.forEach(card => {
+                card.addEventListener('mousemove', handleTilt);
+                card.addEventListener('mouseleave', resetTilt);
+            });
+        }
+
+        function handleTilt(e) {
+            const card = e.currentTarget;
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+
+            const rotateX = ((y - centerY) / centerY) * -10; // Max 10deg rotation
+            const rotateY = ((x - centerX) / centerX) * 10;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+        }
+
+        function resetTilt(e) {
+            const card = e.currentTarget;
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+        }
+
+        // Initialize Effects
+        document.addEventListener('DOMContentLoaded', () => {
+            initTypewriter();
+            initTiltEffect();
+        });
+
+        // Re-init tilt when assessment back button is clicked (since cards might be re-rendered or just hidden)
+        // Actually cards are static in HTML, but if we re-render them we need to re-attach listeners.
+        // In this app, renderUseCases() is called once at init. If we ever call it again, we need to call initTiltEffect() again.
+
+        // Hook into the existing renderUseCases function if needed, but for now it runs on load.
+        // Just in case renderUseCases is called again:
+        const originalRender = renderUseCases;
+        renderUseCases = function () {
+            originalRender();
+            initTiltEffect();
+        };
+
+        // ================================================
+        // STAR FIELD — Animated canvas background
+        // ================================================
+        const canvas = document.getElementById('starfield');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let stars = [];
+            let shootingStars = [];
+
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+
+            function createStars(count) {
+                stars = [];
+                for (let i = 0; i < count; i++) {
+                    stars.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        radius: Math.random() * 1.5 + 0.3,
+                        alpha: Math.random() * 0.8 + 0.2,
+                        twinkleSpeed: Math.random() * 0.02 + 0.005,
+                        twinkleOffset: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            function maybeSpawnShootingStar() {
+                if (Math.random() < 0.003 && shootingStars.length < 2) {
+                    shootingStars.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height * 0.5,
+                        length: Math.random() * 80 + 40,
+                        speed: Math.random() * 6 + 4,
+                        angle: Math.PI / 4 + (Math.random() - 0.5) * 0.3,
+                        alpha: 1,
+                        decay: Math.random() * 0.02 + 0.015
+                    });
+                }
+            }
+
+            function drawStars(time) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                stars.forEach(star => {
+                    const twinkle = Math.sin(time * star.twinkleSpeed + star.twinkleOffset);
+                    const alpha = star.alpha * (0.6 + 0.4 * twinkle);
+                    ctx.beginPath();
+                    ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(220, 225, 255, ${alpha})`;
+                    ctx.fill();
+                });
+
+                shootingStars.forEach((ss, i) => {
+                    const endX = ss.x + Math.cos(ss.angle) * ss.length;
+                    const endY = ss.y + Math.sin(ss.angle) * ss.length;
+                    const gradient = ctx.createLinearGradient(ss.x, ss.y, endX, endY);
+                    gradient.addColorStop(0, `rgba(255, 123, 66, ${ss.alpha})`);
+                    gradient.addColorStop(1, `rgba(255, 123, 66, 0)`);
+
+                    ctx.beginPath();
+                    ctx.moveTo(ss.x, ss.y);
+                    ctx.lineTo(endX, endY);
+                    ctx.strokeStyle = gradient;
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+
+                    ss.x += Math.cos(ss.angle) * ss.speed;
+                    ss.y += Math.sin(ss.angle) * ss.speed;
+                    ss.alpha -= ss.decay;
+
+                    if (ss.alpha <= 0 || ss.x > canvas.width || ss.y > canvas.height) {
+                        shootingStars.splice(i, 1);
+                    }
+                });
+
+                maybeSpawnShootingStar();
+            }
+
+            function animate(time) {
+                drawStars(time);
+                requestAnimationFrame(animate);
+            }
+
+            resizeCanvas();
+            createStars(200);
+            requestAnimationFrame(animate);
+
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                createStars(200);
+            });
+        }
+    </script>
+</body>
+
+</html>

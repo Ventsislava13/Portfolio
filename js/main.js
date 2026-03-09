@@ -144,9 +144,30 @@ document.addEventListener('DOMContentLoaded', () => {
                 const pos = target.getBoundingClientRect().top + window.scrollY - offset;
                 window.scrollTo({ top: pos, behavior: 'smooth' });
             }
+            // Close mobile menu if open
+            if (navLinks.classList.contains('active')) {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            }
         });
     });
 
+    // ================================================
+    // MOBILE NAVIGATION
+    // ================================================
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('nav-links');
+
+    if (hamburger) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+    }
+
+    // ================================================
+    // NEBULA PARALLAX — subtle mouse following
+    // ================================================
     // ================================================
     // NEBULA PARALLAX — subtle mouse following
     // ================================================
@@ -159,4 +180,38 @@ document.addEventListener('DOMContentLoaded', () => {
             cloud.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
         });
     });
+
+    // ================================================
+    // 3D TILT EFFECT FOR CARDS
+    // ================================================
+    function initTiltEffect() {
+        const cards = document.querySelectorAll('.mission-card');
+
+        cards.forEach(card => {
+            card.addEventListener('mousemove', handleTilt);
+            card.addEventListener('mouseleave', resetTilt);
+        });
+    }
+
+    function handleTilt(e) {
+        const card = e.currentTarget;
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const rotateX = ((y - centerY) / centerY) * -10; // Max 10deg rotation
+        const rotateY = ((x - centerX) / centerX) * 10;
+
+        card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
+    }
+
+    function resetTilt(e) {
+        const card = e.currentTarget;
+        card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale3d(1, 1, 1)';
+    }
+
+    initTiltEffect();
 });
